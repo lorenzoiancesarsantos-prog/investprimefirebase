@@ -1,57 +1,11 @@
 
 "use server";
 
-import { getInvestmentSuggestion } from "@/ai/flows/ai-investment-suggestions";
 import { z } from "zod";
 import { getPortfolio, updatePortfolio, addTransaction } from "@/services/users";
 import { revalidatePath } from "next/cache";
 
-const formSchema = z.object({
-  investmentObjective: z.string().min(1, "Objetivo é obrigatório"),
-  riskProfile: z.enum(["conservador", "moderado", "agressivo"]),
-  availableBalance: z.coerce.number().min(0, "Saldo deve ser positivo"),
-  monthlyInvestment: z.coerce.number().min(0, "Investimento deve ser positivo"),
-});
-
-export type FormState = {
-  analysisSummary?: string;
-  suggestedStrategy?: string;
-  rationale?: string;
-  error?: string;
-  fieldErrors?: Record<string, string>;
-};
-
-export async function generateSuggestionAction(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  
-  const parsed = formSchema.safeParse({
-    investmentObjective: formData.get("investmentObjective"),
-    riskProfile: formData.get("riskProfile"),
-    availableBalance: formData.get("availableBalance"),
-    monthlyInvestment: formData.get("monthlyInvestment"),
-  });
-
-  if (!parsed.success) {
-    const fieldErrors = parsed.error.issues.reduce((acc, issue) => {
-        if (issue.path[0]) {
-            acc[issue.path[0] as string] = issue.message;
-        }
-        return acc;
-    }, {} as Record<string, string>);
-    return { error: "Verifique os dados informados.", fieldErrors };
-  }
-
-  try {
-    const result = await getInvestmentSuggestion(parsed.data);
-    return result;
-  } catch (e: any) {
-    console.error(e);
-    return { error: "Ocorreu um erro ao gerar a sugestão. Tente novamente." };
-  }
-}
-
+// AI Suggestion related form state and action are removed as Genkit is being removed.
 
 const buyRoyaltiesSchema = z.object({
   quantity: z.coerce.number().min(1, "A quantidade deve ser de pelo menos 1."),
