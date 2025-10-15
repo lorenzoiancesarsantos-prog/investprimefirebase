@@ -1,0 +1,139 @@
+
+{
+  "header": {
+    "features": "Features",
+    "howItWorks": "Como Funciona",
+    "testimonials": "Depoimentos",
+    "faq": "FAQ",
+    "login": "Login",
+    "signUp": "Cadastre-se"
+  },
+  "hero": {
+    "title": "Oportunidades de Investimento em <span class='text-primary'>Royalties</span>",
+    "subtitle": "Invista em direitos creditórios com transparência e receba rendimentos atrelados à performance de ativos reais.",
+    "cta1": "Ver Oportunidades",
+    "cta2": "Entenda os Riscos",
+    "disclaimer": "*Investimentos em royalties são de alto risco e não possuem garantia de retorno.",
+    "carousel": {
+      "slide1": {
+        "title": "Rendimentos Reais",
+        "description": "Clientes satisfeitos com investimentos transparentes."
+      },
+      "slide2": {
+        "title": "Segurança e Confiança",
+        "description": "Invista com tranquilidade e veja seus retornos crescerem."
+      }
+    }
+  },
+  "features": {
+    "title": "O que é Investir em Royalties?",
+    "subtitle": "Uma nova classe de ativos, descorrelacionada da bolsa tradicional, para diversificar sua carteira.",
+    "items": {
+      "securitization": {
+        "title": "Securitização de Recebíveis",
+        "description": "Transformamos fluxos de caixa futuros (royalties musicais, patentes, etc.) em títulos de investimento."
+      },
+      "diversification": {
+        "title": "Diversificação de Portfólio",
+        "description": "Adicione uma nova classe de ativos à sua carteira, descorrelacionada da bolsa tradicional."
+      },
+      "risk": {
+        "title": "Estrutura de Risco",
+        "description": "Cada operação é detalhada com uma análise de risco e prazos específicos."
+      },
+      "compliance": {
+        "title": "Compliance & Regulação",
+        "description": "Atuamos conforme as leis do mercado financeiro e buscamos autorização regulatória para todas as ofertas."
+      }
+    }
+  },
+  "howItWorks": {
+    "title": "Como Funciona a Securitização",
+    "subtitle": "Um processo simples e transparente em 3 passos para começar a investir.",
+    "steps": {
+      "origination": {
+        "title": "Originação",
+        "description": "Identificamos e analisamos ativos com fluxos de receita de royalties, como direitos autorais de músicas ou patentes."
+      },
+      "structuring": {
+        "title": "Estruturação",
+        "description": "Criamos um título de investimento lastreado nesse ativo, com termos claros de risco e retorno."
+      },
+      "distribution": {
+        "title": "Distribuição",
+        "description": "A oferta é disponibilizada na plataforma, com todos os documentos e riscos detalhados para sua análise."
+      }
+    },
+    "cta": "Cadastre-se para Ver as Oportunidades"
+  },
+  "testimonials": {
+    "title": "O que Nossos Investidores Dizem",
+    "subtitle": "Feedback real de pessoas que confiam na nossa plataforma.",
+    "reviews": [
+      {
+        "quote": "\"Investir com a Invest Prime me trouxe segurança e retornos consistentes. Recomendo muito!\"",
+        "name": "João Silva",
+        "age": "35 anos"
+      },
+      {
+        "quote": "\"Transparência total e um suporte excelente. Me sinto seguro com meus investimentos aqui.\"",
+        "name": "Maria Oliveira",
+        "age": "45 anos"
+      },
+      {
+        "quote": "\"Diversificação perfeita para minha carteira. Resultados acima do esperado!\"",
+        "name": "Carlos Mendes",
+        "age": "28 anos"
+      }
+    ]
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Encontre respostas para as dúvidas mais comuns sobre o investimento em royalties.",
+    "questions": [
+      {
+        "question": "O que são royalties?",
+        "answer": "Royalties são pagamentos feitos aos proprietários de um ativo (como uma música, filme ou tecnologia) pelo direito de usar esse ativo. A receita é gerada de forma recorrente ao longo do tempo."
+      },
+      {
+        "question": "Existe risco de perda?",
+        "answer": "Sim. Como em qualquer investimento, existe o risco de perda de capital. O valor dos retornos está diretamente ligado à performance do ativo. Você deve estar ciente de todos os riscos antes de investir."
+      },
+      {
+        "question": "Quem pode investir com a Invest Prime?",
+        "answer": "Nossas ofertas são direcionadas a investidores que buscam diversificação e entendem os riscos de investimentos alternativos. Algumas ofertas podem ser restritas a 'Investidores Qualificados' conforme a regulamentação."
+      },
+      {
+        "question": "Como começo a investir?",
+        "answer": "Cadastre-se na plataforma, verifique sua identidade e explore as oportunidades disponíveis. Nossa equipe está à disposição para te auxiliar."
+      },
+      {
+        "question": "Quais são os custos envolvidos?",
+        "answer": "Não cobramos taxas de entrada, mas existem custos de administração e performance detalhados em cada oferta."
+      }
+    ]
+  },
+  "footer": {
+    "tagline": "Invista com Inteligência e Transparência",
+    "links": {
+      "title": "Links Úteis",
+      "features": "Features",
+      "howItWorks": "Como funciona",
+      "terms": "Termos de Uso",
+      "privacy": "Política de Privacidade"
+    },
+    "contact": {
+      "title": "Contato",
+      "email": "contato@grupoinvestprimebrazil.com.br",
+      "phone": "(11) 9999-9999"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "subtitle": "Inscreva-se para receber as últimas notícias e ofertas.",
+      "placeholder": "Seu e-mail",
+      "subscribe": "Inscrever-se"
+    },
+    "copyright": "Invest Prime. Todos os direitos reservados. CNPJ: 12.345.678/0001-90",
+    "disclaimer": "A Invest Prime não é uma instituição financeira. A plataforma estrutura ofertas públicas de securitização em conformidade com a lei brasileira. Consulte nossos regulamentos e material de risco antes de investir. Retornos passados não garantem resultados futuros."
+  }
+}

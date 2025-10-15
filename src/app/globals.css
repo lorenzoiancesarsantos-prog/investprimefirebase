@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 240 5% 6%; /* #0f0f0f */
+    --foreground: 0 0% 100%;
+    --card: 240 5% 10%; /* #1a1a1a */
+    --card-foreground: 0 0% 100%;
+    --popover: 240 5% 6%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 45 65% 51%; /* #d4af37 */
+    --primary-foreground: 240 6% 10%;
+    --secondary: 240 5% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 50%; /* #808080 */
+    --muted-foreground: 0 0% 69%; /* #b0b0b0 */
+    --accent: 240 4% 17%; /* #2c2c2c */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 356 89% 60%; /* #ff4757 */
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 20%; /* #333333 */
+    --input: 240 5% 10%;
+    --ring: 45 65% 51%;
+    --chart-1: 45 65% 51%;
+    --chart-2: 165 100% 41%; /* #00d4aa */
+    --chart-3: 38 92% 50%; /* #ffa502 */
+    --chart-4: 356 89% 60%; /* #ff4757 */
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 5% 6%; /* #0f0f0f */
+    --foreground: 0 0% 100%;
+    --card: 240 5% 10%; /* #1a1a1a */
+    --card-foreground: 0 0% 100%;
+    --popover: 240 5% 6%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 45 65% 51%; /* #d4af37 */
+    --primary-foreground: 240 6% 10%;
+    --secondary: 240 5% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 50%; /* #808080 */
+    --muted-foreground: 0 0% 69%; /* #b0b0b0 */
+    --accent: 240 4% 17%; /* #2c2c2c */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 356 89% 60%; /* #ff4757 */
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 20%; /* #333333 */
+    --input: 240 5% 10%;
+    --ring: 45 65% 51%;
+    --chart-1: 45 65% 51%;
+    --chart-2: 165 100% 41%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 356 89% 60%;
+    --chart-5: 27 87% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}

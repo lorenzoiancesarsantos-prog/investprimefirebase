@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =================================================================
+    // 1. Regras para Coleções de Usuário (users e portfolios)
+    // =================================================================
+    match /users/{userId} {
+      // PERMISSÃO DE CRIAÇÃO (CREATE):
+      // Permite a criação APENAS se o ID do documento for o mesmo do usuário autenticado.
+      // Isso é vital para a função createUserProfileAndPortfolio.
+      allow create: if request.auth.uid == userId;
+
+      // PERMISSÃO DE LEITURA/ATUALIZAÇÃO/DELEÇÃO (READ/UPDATE/DELETE):
+      // Permite que o usuário acesse SOMENTE seu próprio documento.
+      allow read, update, delete: if request.auth.uid == userId;
+      
+      // =================================================================
+      // 2. Regras para Subcoleção de Transações (transactions)
+      // =================================================================
+      match /transactions/{transactionId} {
+        // As transações estão dentro de /users/{userId}/transactions/{transactionId}
+        // O {userId} no path é o ID do documento pai.
+        // Permite CRIAÇÃO se o usuário for o dono do documento pai.
+        allow create: if request.auth.uid == userId;
+        
+        // Permite LEITURA (e outras operações) se o usuário for o dono.
+        allow read, update, delete: if request.auth.uid == userId;
+      }
+    }
+
+    match /portfolios/{portfolioId} {
+      // Regras idênticas à coleção 'users', pois o Portfolio é 1:1 com o User
+      allow create: if request.auth.uid == portfolioId;
+      allow read, update, delete: if request.auth.uid == portfolioId;
+    }
+
+    // =================================================================
+    // 3. Regras para Coleções Públicas ou Administrativas
+    // =================================================================
+    match /campaigns/{campaignId} {
+      allow read: if true; 
+      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    match /investments/{investmentId} {
+      allow read: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /_health_checks/{docId} {
+       allow read, write: if request.auth != null;
+    }
+  }
+}

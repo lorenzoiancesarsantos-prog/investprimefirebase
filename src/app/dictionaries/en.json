@@ -1,0 +1,139 @@
+
+{
+  "header": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "testimonials": "Testimonials",
+    "faq": "FAQ",
+    "login": "Login",
+    "signUp": "Sign Up"
+  },
+  "hero": {
+    "title": "Investment Opportunities in <span class='text-primary'>Royalties</span>",
+    "subtitle": "Invest transparently in credit rights and receive returns linked to the performance of real assets.",
+    "cta1": "See Opportunities",
+    "cta2": "Understand the Risks",
+    "disclaimer": "*Royalty investments are high-risk and do not guarantee returns.",
+    "carousel": {
+      "slide1": {
+        "title": "Real Returns",
+        "description": "Satisfied clients with transparent investments."
+      },
+      "slide2": {
+        "title": "Security and Trust",
+        "description": "Invest with peace of mind and watch your returns grow."
+      }
+    }
+  },
+  "features": {
+    "title": "What is Investing in Royalties?",
+    "subtitle": "A new asset class, uncorrelated from traditional stock markets, to diversify your portfolio.",
+    "items": {
+      "securitization": {
+        "title": "Receivables Securitization",
+        "description": "We turn future cash flows (music royalties, patents, etc.) into investment securities."
+      },
+      "diversification": {
+        "title": "Portfolio Diversification",
+        "description": "Add a new asset class to your portfolio, uncorrelated from traditional stock markets."
+      },
+      "risk": {
+        "title": "Risk Structure",
+        "description": "Each operation is detailed with a risk analysis and specific deadlines."
+      },
+      "compliance": {
+        "title": "Compliance & Regulation",
+        "description": "We operate in accordance with financial market laws and seek regulatory authorization for all offers."
+      }
+    }
+  },
+  "howItWorks": {
+    "title": "How Securitization Works",
+    "subtitle": "A simple and transparent 3-step process to start investing.",
+    "steps": {
+      "origination": {
+        "title": "Origination",
+        "description": "We identify and analyze assets with royalty revenue streams, such as music copyrights or patents."
+      },
+      "structuring": {
+        "title": "Structuring",
+        "description": "We create an investment security backed by this asset, with clear risk and return terms."
+      },
+      "distribution": {
+        "title": "Distribution",
+        "description": "The offer is made available on the platform, with all documents and risks detailed for your analysis."
+      }
+    },
+    "cta": "Sign Up to See Opportunities"
+  },
+  "testimonials": {
+    "title": "What Our Investors Say",
+    "subtitle": "Real feedback from people who trust our platform.",
+    "reviews": [
+      {
+        "quote": "\"Investing with Invest Prime brought me security and consistent returns. I highly recommend it!\"",
+        "name": "João Silva",
+        "age": "35 years old"
+      },
+      {
+        "quote": "\"Total transparency and excellent support. I feel safe with my investments here.\"",
+        "name": "Maria Oliveira",
+        "age": "45 years old"
+      },
+      {
+        "quote": "\"Perfect diversification for my portfolio. Results above expectations!\"",
+        "name": "Carlos Mendes",
+        "age": "28 years old"
+      }
+    ]
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to the most common questions about investing in royalties.",
+    "questions": [
+      {
+        "question": "What are royalties?",
+        "answer": "Royalties are payments made to the owners of an asset (like a song, movie, or technology) for the right to use that asset. Revenue is generated recurrently over time."
+      },
+      {
+        "question": "Is there a risk of loss?",
+        "answer": "Yes. As with any investment, there is a risk of capital loss. The value of returns is directly tied to the asset's performance. You should be aware of all risks before investing."
+      },
+      {
+        "question": "Who can invest with Invest Prime?",
+        "answer": "Our offers are aimed at investors seeking diversification who understand the risks of alternative investments. Some offers may be restricted to 'Qualified Investors' as per regulations."
+      },
+      {
+        "question": "How do I start investing?",
+        "answer": "Sign up on the platform, verify your identity, and explore the available opportunities. Our team is available to assist you."
+      },
+      {
+        "question": "What are the costs involved?",
+        "answer": "We do not charge entry fees, but there are administration and performance costs detailed in each offer."
+      }
+    ]
+  },
+  "footer": {
+    "tagline": "Invest with Intelligence and Transparency",
+    "links": {
+      "title": "Useful Links",
+      "features": "Features",
+      "howItWorks": "How it Works",
+      "terms": "Terms of Use",
+      "privacy": "Privacy Policy"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "contato@grupoinvestprimebrazil.com.br",
+      "phone": "(11) 9999-9999"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "subtitle": "Subscribe to receive the latest news and offers.",
+      "placeholder": "Your email",
+      "subscribe": "Subscribe"
+    },
+    "copyright": "Invest Prime. All rights reserved. CNPJ: 12.345.678/0001-90",
+    "disclaimer": "Invest Prime is not a financial institution. The platform structures public securitization offerings in compliance with Brazilian law. Consult our regulations and risk material before investing. Past performance does not guarantee future results."
+  }
+}
