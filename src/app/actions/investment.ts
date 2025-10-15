@@ -4,8 +4,58 @@
 import { z } from "zod";
 import { getPortfolio, updatePortfolio, addTransaction } from "@/services/users";
 import { revalidatePath } from "next/cache";
+import { getInvestmentSuggestion } from "@/ai/flows/ai-investment-suggestions";
 
-// AI Suggestion related form state and action are removed as Genkit is being removed.
+export type FormState = {
+  fieldErrors?: Record<string, string>;
+  error?: string;
+  suggestedStrategy?: string;
+  analysisSummary?: string;
+  rationale?: string;
+};
+
+const investmentProfileSchema = z.object({
+  investmentObjective: z.string().min(10, "O objetivo de investimento deve ter pelo menos 10 caracteres."),
+  riskProfile: z.enum(["conservador", "moderado", "agressivo"]),
+  availableBalance: z.coerce.number().min(0, "O saldo deve ser um número positivo."),
+  monthlyInvestment: z.coerce.number().min(0, "O investimento mensal deve ser um número positivo."),
+});
+
+export async function generateSuggestionAction(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const validatedFields = investmentProfileSchema.safeParse({
+    investmentObjective: formData.get("investmentObjective"),
+    riskProfile: formData.get("riskProfile"),
+    availableBalance: formData.get("availableBalance"),
+    monthlyInvestment: formData.get("monthlyInvestment"),
+  });
+
+  if (!validatedFields.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of validatedFields.error.issues) {
+      fieldErrors[issue.path[0]] = issue.message;
+    }
+    return { fieldErrors };
+  }
+
+  try {
+    const suggestion = await getInvestmentSuggestion(validatedFields.data);
+    if (!suggestion) {
+      return { error: "Não foi possível gerar uma sugestão. Tente novamente." };
+    }
+    return {
+        suggestedStrategy: suggestion.suggestedStrategy,
+        analysisSummary: suggestion.analysisSummary,
+        rationale: suggestion.rationale
+    };
+  } catch (error) {
+    console.error("Error generating suggestion:", error);
+    return { error: "Ocorreu um erro no servidor ao gerar a sugestão." };
+  }
+}
+
 
 const buyRoyaltiesSchema = z.object({
   quantity: z.coerce.number().min(1, "A quantidade deve ser de pelo menos 1."),
