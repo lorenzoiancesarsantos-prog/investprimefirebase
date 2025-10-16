@@ -6,4 +6,4 @@ env:
   - variable: FIRESTORE_PROJECT_ID
     value: "studio-7505780173-ba373"
   - variable: GEMINI_API_KEY
-    value: "YOUR_GEMINI_KEY_HERE"
+    value: "AIzaSyACGTu95SHjxlhlczIw7yZsmBUJCAC9UUo"
