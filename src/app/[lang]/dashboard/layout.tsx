@@ -22,7 +22,7 @@ import {
 import { Logo } from "@/components/logo";
 import { Header } from "@/components/dashboard/header";
 import { UserNav } from "@/components/dashboard/user-nav";
-import { getUser } from "@/services/users";
+import { getUserAction } from "@/app/actions/user"; // Alterado para Server Action
 import { getFirebaseAuth } from "@/firebase";
 import { useEffect, useState } from "react";
 import type { User } from "@/lib/types";
@@ -41,7 +41,7 @@ export default function DashboardLayout({
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        const userData = await getUser(firebaseUser.uid);
+        const userData = await getUserAction(firebaseUser.uid); // Alterado para Server Action
         setUser(userData);
       } else {
         setUser(null);

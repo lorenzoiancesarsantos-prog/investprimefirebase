@@ -34,7 +34,7 @@ import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getFirebaseAuth } from '@/firebase';
-import { checkUserRole } from '@/services/users';
+import { checkUserRoleAction } from '@/app/actions/user'; // Alterado para Server Action
 
 function AdminUserNav() {
   const params = useParams();
@@ -154,7 +154,7 @@ export default function AdminLayout({
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const role = await checkUserRole(user.uid);
+        const role = await checkUserRoleAction(user.uid); // Alterado para Server Action
         if (role === 'admin') {
           setIsAuthorized(true);
         } else {

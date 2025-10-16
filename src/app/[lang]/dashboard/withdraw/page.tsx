@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getPortfolio } from "@/services/users";
+import { getPortfolioAction } from "@/app/actions/user"; // Alterado para Server Action
 import { CircleDollarSign, Info, Clock, CalendarCheck, Download, Loader2 } from "lucide-react";
 import { getFirebaseAuth } from "@/firebase";
 import { useEffect, useState, useTransition } from "react";
@@ -28,7 +28,7 @@ export default function WithdrawPage() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUserId(user.uid);
-        const portfolioData = await getPortfolio(user.uid);
+        const portfolioData = await getPortfolioAction(user.uid); // Alterado para Server Action
         setPortfolio(portfolioData);
       } else {
         setUserId(null);
@@ -72,7 +72,7 @@ export default function WithdrawPage() {
         });
         setAmount(''); 
         if(auth.currentUser) {
-           const portfolioData = await getPortfolio(auth.currentUser.uid);
+           const portfolioData = await getPortfolioAction(auth.currentUser.uid); // Alterado para Server Action
            setPortfolio(portfolioData);
         }
       }

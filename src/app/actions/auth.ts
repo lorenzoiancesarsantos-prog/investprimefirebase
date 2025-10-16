@@ -5,7 +5,6 @@ import { z } from "zod";
 import { getAuth } from "firebase-admin/auth";
 import { createUserProfileAndPortfolio } from "@/services/users";
 import { getFirebaseAdminApp } from "@/firebase-admin";
-import { FirebaseError } from "firebase-admin";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Nome é obrigatório"),
@@ -59,7 +58,8 @@ export async function signupAction(values: unknown) {
   } catch (error: any) {
     console.error("Erro no cadastro (signupAction):", error.code, error.message);
     
-    if (error instanceof FirebaseError) {
+    // Duck typing to check if it's a Firebase Auth error
+    if (error.code) {
         switch (error.code) {
             case 'auth/email-already-exists':
                 return { error: "Este e-mail já está em uso." };

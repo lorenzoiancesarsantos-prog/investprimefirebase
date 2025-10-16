@@ -5,7 +5,7 @@ import { OverviewCards } from "@/components/dashboard/overview-cards";
 import { InvestmentChart } from "@/components/dashboard/investment-chart";
 import { RecentPurchases } from "@/components/dashboard/recent-purchases";
 import { HistoryPage } from "./history/page";
-import { getUser, getPortfolio } from "@/services/users";
+import { getUserAction, getPortfolioAction } from "@/app/actions/user"; // Alterado para Server Action
 import { getFirebaseAuth } from "@/firebase";
 import { useEffect, useState } from "react";
 import type { User, Portfolio } from "@/lib/types";
@@ -20,8 +20,8 @@ export default function DashboardPage() {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
         const [userData, portfolioData] = await Promise.all([
-          getUser(firebaseUser.uid),
-          getPortfolio(firebaseUser.uid)
+          getUserAction(firebaseUser.uid), // Alterado para Server Action
+          getPortfolioAction(firebaseUser.uid) // Alterado para Server Action
         ]);
         setUser(userData);
         setPortfolio(portfolioData);

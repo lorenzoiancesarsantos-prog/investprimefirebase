@@ -62,7 +62,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { getUsers as fetchUsers, addUser as saveUser, updateUser as editUser, deleteUser as removeUser } from '@/services/users';
+import { getUsersAction, addUserAction, updateUserAction, deleteUserAction } from '@/app/actions/user';
 import { Timestamp } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 
@@ -73,9 +73,9 @@ const formatCurrency = (value: number) =>
     currency: 'BRL',
   }).format(value);
 
-const formatDate = (timestamp: Timestamp | Date) => {
+const formatDate = (timestamp: Timestamp | Date | any) => {
     if (!timestamp) return '-';
-    const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.seconds * 1000);
     return new Intl.DateTimeFormat('pt-BR', {
         day: '2-digit',
         month: '2-digit',
@@ -99,7 +99,7 @@ function AddUserModal({ onUserAdded }: { onUserAdded: () => void }) {
             status: 'active',
             role: 'user',
         };
-        await saveUser(newUser);
+        await addUserAction(newUser);
         onUserAdded();
         setName('');
         setEmail('');
@@ -170,7 +170,7 @@ function EditUserModal({ user, onSave, onClose }: { user: User, onSave: (updated
 
     const handleSave = async () => {
         const updatedUser = { ...user, name, email, accountType, status };
-        await editUser(updatedUser);
+        await updateUserAction(updatedUser);
         onSave(updatedUser);
     }
 
@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
 
   const loadUsers = async () => {
     setLoading(true);
-    const fetchedUsers = await fetchUsers();
+    const fetchedUsers = await getUsersAction();
     setUsers(fetchedUsers);
     setLoading(false);
   }
@@ -269,7 +269,7 @@ export default function AdminUsersPage() {
   }
 
   const handleDeleteUser = async (userId: string) => {
-    await removeUser(userId);
+    await deleteUserAction(userId);
     setUsers(currentUsers => currentUsers.filter(u => u.id !== userId));
   }
 
@@ -417,5 +417,3 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-
-    

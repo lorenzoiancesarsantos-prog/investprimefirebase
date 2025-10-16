@@ -1,3 +1,9 @@
-run:
-  build: npm run build
-  start: npm run start
+runtime: nodejs18
+entrypoint: npm run start
+env:
+  - variable: FIREBASE_API_KEY
+    value: "AIzaSyCOdAv8886YidVLgzYrHmO6G9c0_xyKg10"
+  - variable: FIRESTORE_PROJECT_ID
+    value: "studio-7505780173-ba373"
+  - variable: GEMINI_API_KEY
+    value: "YOUR_GEMINI_KEY_HERE"

@@ -43,7 +43,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
-import { getUsers } from '@/services/users';
+import { getUsersAction } from '@/app/actions/user'; // Atualizado para usar a Server Action
 import type { User } from '@/lib/types';
 import { Timestamp } from 'firebase/firestore';
 
@@ -53,9 +53,10 @@ const formatCurrency = (value: number) =>
     currency: 'BRL',
   }).format(value);
   
-const formatDate = (timestamp: Timestamp | Date) => {
+const formatDate = (timestamp: Timestamp | Date | any) => { // Aceita 'any' temporariamente
     if (!timestamp) return '-';
-    const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+    // O objeto da Server Action pode não ser uma instância de Timestamp
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.seconds * 1000);
     return new Intl.DateTimeFormat('pt-BR', {
         day: '2-digit',
         month: '2-digit',
@@ -72,8 +73,13 @@ export default function AdminDashboardPage() {
     useEffect(() => {
       async function loadUsers() {
         setLoading(true);
-        const fetchedUsers = await getUsers();
-        setUsers(fetchedUsers);
+        try {
+          const fetchedUsers = await getUsersAction();
+          setUsers(fetchedUsers);
+        } catch (error) {
+          console.error("Erro ao buscar usuários:", error);
+          // Opcional: Adicionar um estado de erro para a UI
+        }
         setLoading(false);
       }
       loadUsers();
@@ -282,5 +288,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    

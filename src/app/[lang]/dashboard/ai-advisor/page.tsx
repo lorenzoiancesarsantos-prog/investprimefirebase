@@ -3,6 +3,7 @@
 
 import { useFormState, useFormStatus } from 'react-dom';
 import { generateSuggestionAction, FormState } from '@/app/actions/investment';
+import { getPortfolioAction } from '@/app/actions/user'; // Alterado para Server Action
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { BrainCircuit, Loader2, BarChart, Sparkles, FileText, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useEffect, useState } from 'react';
-import { getPortfolio } from '@/services/users';
 import { getFirebaseAuth } from '@/firebase';
 import type { Portfolio } from '@/lib/types';
 
@@ -47,7 +47,7 @@ export default function AiAdvisorPage() {
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const portfolioData = await getPortfolio(user.uid);
+        const portfolioData = await getPortfolioAction(user.uid); // Alterado para Server Action
         setPortfolio(portfolioData);
       }
       setLoading(false);

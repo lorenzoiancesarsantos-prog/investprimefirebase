@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, Handshake, Landmark, Info } from 'lucide-react';
 import { useState, useEffect } from "react";
-import { getTransactions } from "@/services/users";
+import { getTransactionsAction } from "@/app/actions/user"; // Alterado para Server Action
 import { getFirebaseAuth } from "@/firebase";
 import type { Transaction } from "@/lib/types";
 
@@ -16,7 +16,7 @@ export function HistoryPage() {
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const transactions = await getTransactions(user.uid);
+        const transactions = await getTransactionsAction(user.uid); // Alterado para Server Action
         // Sort on the client to ensure consistency and avoid hydration mismatches
         const sortedHistory = [...transactions].sort((a, b) => {
             const dateA = a.date ? new Date(a.date).getTime() : 0;

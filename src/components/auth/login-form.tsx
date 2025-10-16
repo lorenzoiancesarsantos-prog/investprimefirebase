@@ -17,11 +17,11 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/firebase";
-import { checkUserRole } from "@/services/users";
+import { checkUserRoleAction } from "@/app/actions/user"; // Importando a Server Action
 
 const formSchema = z.object({
   email: z.string().email({
@@ -58,7 +58,8 @@ export function LoginForm() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
-      const role = await checkUserRole(userId);
+      // Chamando a Server Action para verificar o papel do usuário
+      const role = await checkUserRoleAction(userId);
 
       setIsLoading(false);
 

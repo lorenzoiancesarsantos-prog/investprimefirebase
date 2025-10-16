@@ -34,7 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState } from 'react';
-import { getUser } from '@/services/users';
+import { getUserAction } from "@/app/actions/user"; // Alterado para Server Action
 import type { User as UserType } from '@/lib/types';
 import { getFirebaseAuth } from "@/firebase";
 
@@ -71,7 +71,7 @@ export default function UserSettingsPage() {
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        const userData = await getUser(firebaseUser.uid);
+        const userData = await getUserAction(firebaseUser.uid); // Alterado para Server Action
         setUser(userData);
       } else {
         setUser(null);

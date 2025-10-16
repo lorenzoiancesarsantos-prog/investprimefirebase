@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Copy, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { getUser } from "@/services/users";
+import { getUserAction } from "@/app/actions/user"; // Alterado para Server Action
 import type { User } from "@/lib/types";
 import { getFirebaseAuth } from "@/firebase";
 
@@ -24,7 +24,7 @@ export default function ReferralsPage() {
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        const userData = await getUser(firebaseUser.uid);
+        const userData = await getUserAction(firebaseUser.uid); // Alterado para Server Action
         setUser(userData);
       } else {
         setUser(null);
