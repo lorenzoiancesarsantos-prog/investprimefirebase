@@ -6,7 +6,7 @@ export type User = {
   name: string;
   email: string;
   phone: string;
-  registrationDate: Timestamp | FieldValue;
+  registrationDate: Timestamp | FieldValue | Date;
   invested: number;
   accountType: 'Standard' | 'Premium' | 'VIP';
   status: 'active' | 'inactive';
@@ -30,21 +30,23 @@ export type Transaction = {
 };
 
 export type Investment = {
-  id: string;
-  name: string;
-  description: string;
-  riskLevel: 'low' | 'medium' | 'high';
-  expectedReturn: number;
-  minInvestment: number;
-  term: number; // in months
+    id: string;
+    userId: number;
+    userName: string;
+    amount: number;
+    expectedReturn: number;
+    startDate: string; // formatted as string
+    duration: string;
+    status: 'active' | 'completed';
 }
 
 export type Campaign = {
     id: string;
     name: string;
+    status: 'active' | 'paused' | 'ended';
     description: string;
-    startDate: Timestamp | FieldValue;
-    endDate: Timestamp | FieldValue;
+    startDate: string; // formatted as string
+    endDate: string; // formatted as string
+    conversion: string;
     targetAudience: string;
-    status: 'active' | 'inactive';
 }

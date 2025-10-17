@@ -1,12 +1,8 @@
 
 import { getFirestore, FieldValue, Timestamp, DocumentData, FirestoreDataConverter } from 'firebase-admin/firestore';
-import { getFirebaseAdminApp } from '@/firebase-admin';
+import { getFirebaseAdminDb, getFirebaseAdminAuth } from "@/firebase";
 import type { User, Portfolio, Transaction } from "@/lib/types";
 
-// Helper function to get the admin Firestore instance.
-function getFirebaseAdminDb() {
-  return getFirestore(getFirebaseAdminApp());
-}
 
 export async function getUsers(): Promise<User[]> {
   const db = getFirebaseAdminDb();
@@ -92,6 +88,7 @@ export async function updateUser(user: User) {
 
 export async function deleteUser(userId: string) {
     const db = getFirebaseAdminDb();
+    const auth = getFirebaseAdminAuth();
     const batch = db.batch();
     
     const userDocRef = db.collection("users").doc(userId);
@@ -101,12 +98,18 @@ export async function deleteUser(userId: string) {
     batch.delete(portfolioDocRef);
     
     await batch.commit();
+
+    // Delete user from Auth after deleting from Firestore
+    try {
+        await auth.deleteUser(userId);
+    } catch (error) {
+        console.error(`Failed to delete auth user ${userId}:`, error);
+        // Decide if you want to re-throw or just log this
+    }
 }
 
 const transactionConverter: FirestoreDataConverter<Transaction> = {
   toFirestore(transaction: Transaction): DocumentData {
-    // A data é convertida de volta para Timestamp ao salvar, se necessário.
-    // Para esta app, estamos apenas lendo, então não é crucial.
     return { 
       amount: transaction.amount,
       quantity: transaction.quantity,
@@ -144,12 +147,6 @@ export async function addTransaction(userId: string, transaction: Omit<Transacti
     });
 }
 
-/**
- * Updates a user's portfolio using Firestore's atomic increment operation.
- * This is crucial for data integrity, especially with concurrent operations.
- * @param userId The ID of the user whose portfolio is to be updated.
- * @param updates An object with fields to increment/decrement. Use negative numbers for decrementing.
- */
 export async function updatePortfolio(userId: string, updates: Partial<Portfolio>) {
     const db = getFirebaseAdminDb();
     const portfolioDocRef = db.collection("portfolios").doc(userId);
@@ -173,12 +170,6 @@ export async function updatePortfolio(userId: string, updates: Partial<Portfolio
     }
 }
 
-/**
- * Creates the user profile and portfolio documents in Firestore.
- * This is called from the signup server action.
- * @param uid The user's ID from Firebase Auth.
- * @param userData The basic user data (name, email).
- */
 export async function createUserProfileAndPortfolio(uid: string, userData: { name: string, email: string }) {
   const db = getFirebaseAdminDb();
   const batch = db.batch();

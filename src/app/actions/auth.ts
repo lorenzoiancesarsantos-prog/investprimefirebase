@@ -2,9 +2,8 @@
 "use server";
 
 import { z } from "zod";
-import { getAuth } from "firebase-admin/auth";
 import { createUserProfileAndPortfolio } from "@/services/users";
-import { getFirebaseAdminApp } from "@/firebase-admin";
+import { getFirebaseAdminAuth } from "@/firebase";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Nome é obrigatório"),
@@ -29,8 +28,7 @@ export async function signupAction(values: unknown) {
   const { email, password, fullName } = parsed.data;
   
   try {
-    const app = getFirebaseAdminApp();
-    const auth = getAuth(app);
+    const auth = getFirebaseAdminAuth();
 
     const userRecord = await auth.createUser({
         email,
