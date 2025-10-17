@@ -2,7 +2,9 @@
 # This must be the same as the backend id you provided when creating the backend.
 backend: studio
 # Specifies the nodejs version to use.
-runtime: nodejs18
+runtime: nodejs20
+# The command to run to build the server.
+build: npm run build
 # The command to run to start the server.
 run: npm run start
 # The number of instances to run.
