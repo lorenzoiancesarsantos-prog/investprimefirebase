@@ -2,8 +2,10 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
+import { getAuth as getAdminAuth, Auth as AdminAuth } from 'firebase-admin/auth';
 import { getFirestore as getAdminFirestore, Firestore as AdminFirestore } from 'firebase-admin/firestore';
-import { getApp as getAdminApp, getApps as getAdminApps, initializeApp as initializeAdminApp, credential } from 'firebase-admin/app';
+import { getApp as getAdminApp, getApps as getAdminApps, initializeApp as initializeAdminApp, type Credential } from 'firebase-admin/app';
+import * as admin from 'firebase-admin';
 
 // --- Configuração do Cliente (Navegador) ---
 const firebaseConfig = {
@@ -37,24 +39,21 @@ function getAdminFirebaseApp() {
   }
   
   const serviceAccount = process.env.SERVICE_ACCOUNT;
+  let cred: Credential | undefined;
+
   if (serviceAccount) {
     try {
-      return initializeAdminApp({
-        credential: credential.cert(JSON.parse(serviceAccount)),
-      });
+      cred = admin.credential.cert(JSON.parse(serviceAccount));
     } catch(e) {
       console.error("Failed to parse SERVICE_ACCOUNT. Initializing with default credentials.", e);
-      // Fallback to default credentials if parsing fails
-      return initializeAdminApp();
     }
-  } else {
-    // This will only work in a Google Cloud environment
-    return initializeAdminApp();
   }
+
+  return initializeAdminApp(cred ? { credential: cred } : undefined);
 }
 
-export function getFirebaseAdminAuth() {
-  return getAdminFirebaseApp().auth();
+export function getFirebaseAdminAuth(): AdminAuth {
+  return getAdminAuth(getAdminFirebaseApp());
 }
 
 export function getFirebaseAdminDb(): AdminFirestore {
