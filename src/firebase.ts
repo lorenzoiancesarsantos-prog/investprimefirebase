@@ -54,7 +54,7 @@ function getAdminFirebaseApp() {
 
 export function getFirebaseAdminAuth(): AdminAuth {
   return getAdminAuth(getAdminFirebaseApp());
-}
+ }
 
 export function getFirebaseAdminDb(): AdminFirestore {
   return getAdminFirestore(getAdminFirebaseApp());
