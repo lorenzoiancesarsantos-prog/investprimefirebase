@@ -11,6 +11,6 @@
     }
   },
   "apphosting": {
-    "backend": "investprimefirebase"
+    "backend": "studio"
   }
 }
