@@ -1,10 +1,6 @@
 # The name of the backend.
 # This must be the same as the backend id you provided when creating the backend.
 backend: studio
-# The builders to run when creating a new version of the backend.
-build:
-  # The command to run to build the backend.
-  run: npm run build
 # Specifies the nodejs version to use.
 runtime: nodejs18
 # The command to run to start the server.
