@@ -11,3 +11,9 @@ env:
     value: "studio-7505780173-ba373"
   - variable: GEMINI_API_KEY
     secret: GEMINI_API_KEY
+resources:
+  cpu: 1
+  memoryMiB: 512
+scaling:
+  minInstances: 0
+  maxInstances: 5
