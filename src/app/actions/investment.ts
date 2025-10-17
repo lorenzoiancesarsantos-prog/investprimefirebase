@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { getFirebaseAdminDb } from "@/firebase";
+import { getFirebaseAdminDb } from "@/firebase-admin";
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from "next/cache";
 import { getPortfolioAction } from "./user";

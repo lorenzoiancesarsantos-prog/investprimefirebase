@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getFirebaseAdminDb, getFirebaseAdminAuth } from '@/firebase';
+import { getFirebaseAdminDb, getFirebaseAdminAuth } from '@/firebase-admin';
 import type { User, Portfolio, Transaction } from '@/lib/types';
 import { FieldValue, Timestamp, FirestoreDataConverter, DocumentData } from 'firebase-admin/firestore';
 

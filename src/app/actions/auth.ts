@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { getFirebaseAdminDb, getFirebaseAdminAuth } from "@/firebase";
+import { getFirebaseAdminDb, getFirebaseAdminAuth } from "@/firebase-admin";
 import { FieldValue } from 'firebase-admin/firestore';
 import type { User, Portfolio } from '@/lib/types';
 

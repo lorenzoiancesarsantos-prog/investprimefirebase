@@ -1,6 +1,7 @@
-
 import * as admin from 'firebase-admin';
 import { App, getApp, getApps, initializeApp } from 'firebase-admin/app';
+import { getAuth as getAdminAuth, Auth as AdminAuth } from 'firebase-admin/auth';
+import { getFirestore as getAdminFirestore, Firestore as AdminFirestore } from 'firebase-admin/firestore';
 
 function getFirebaseAdminApp(): App {
   if (getApps().length) {
@@ -30,4 +31,10 @@ function getFirebaseAdminApp(): App {
   }
 }
 
-export { getFirebaseAdminApp };
+export function getFirebaseAdminAuth(): AdminAuth {
+  return getAdminAuth(getFirebaseAdminApp());
+}
+
+export function getFirebaseAdminDb(): AdminFirestore {
+  return getAdminFirestore(getFirebaseAdminApp());
+}

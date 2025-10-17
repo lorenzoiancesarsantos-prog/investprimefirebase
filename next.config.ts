@@ -25,6 +25,25 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  webpack: (config, { isServer }) => {
+    config.experiments = { ...config.experiments, asyncWebAssembly: true };
+
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        net: false,
+        tls: false,
+        fs: false,
+      };
+    }
+    
+    config.module.rules.push({
+        test: /\.wasm$/,
+        type: "webassembly/async",
+    });
+
+    return config;
+  },
 };
 
 export default nextConfig;
