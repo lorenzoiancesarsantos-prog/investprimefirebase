@@ -1,8 +1,0 @@
-runtime: nodejs18
-entrypoint: npm run start
-resources:
-  cpu: 1
-  memoryMiB: 512
-scaling:
-  minInstances: 0
-  maxInstances: 5
