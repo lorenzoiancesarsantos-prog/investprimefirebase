@@ -4,8 +4,8 @@ runtime: nodejs18
 entrypoint: npm run start
 env:
   - variable: FIREBASE_API_KEY
-    value: "AIzaSyCOdAv8886YidVLgzYrHmO6G9c0_xyKg10"
+    secret: FIREBASE_API_KEY
   - variable: FIRESTORE_PROJECT_ID
     value: "studio-7505780173-ba373"
   - variable: GEMINI_API_KEY
-    value: "AIzaSyACGTu95SHjxlhlczIw7yZsmBUJCAC9UUo"
+    secret: GEMINI_API_KEY
