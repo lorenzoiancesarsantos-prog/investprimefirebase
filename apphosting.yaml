@@ -1,0 +1,25 @@
+# The name of the backend.
+# This must be the same as the backend id you provided when creating the backend.
+backend: studio
+# The builders to run when creating a new version of the backend.
+build:
+  # The command to run to build the backend.
+  run: npm run build
+# Specifies the nodejs version to use.
+runtime: nodejs18
+# The command to run to start the server.
+run: npm run start
+# The number of instances to run.
+# This is a optional field and if not provided, the default value is 1.
+# For more information, see https://firebase.google.com/docs/app-hosting/reference/apphosting-yaml.
+instanceClass: f1
+# The settings for the server.
+# This is a optional field and if not provided, the default values are used.
+# For more information, see https://firebase.google.com/docs/app-hosting/reference/apphosting-yaml.
+serving:
+  # The number of concurrent requests to allow per instance.
+  concurrency: 100
+  # The number of instances to run.
+  minInstances: 0
+  # The number of instances to run.
+  maxInstances: 5

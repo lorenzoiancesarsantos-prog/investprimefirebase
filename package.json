@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "0.5.4",
@@ -44,7 +43,6 @@
     "lucide-react": "0.475.0",
     "negotiator": "0.6.3",
     "next": "15.3.3",
-    "patch-package": "8.0.0",
     "react": "18.3.1",
     "react-day-picker": "8.10.1",
     "react-dom": "18.3.1",
