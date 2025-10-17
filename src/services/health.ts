@@ -1,20 +1,25 @@
 
 import { doc, setDoc, getDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
-import { getFirebaseDb } from "@/firebase";
+// A função getFirebaseDb() foi removida, então este serviço está temporariamente quebrado.
+// A lógica precisará ser reimplementada usando o Admin SDK se necessário.
+// import { getFirebaseDb } from "@/firebase";
 
 /**
  * Tests the Firestore connection by writing, reading, and then deleting a document.
- * This function is intended for a system health check page in an admin dashboard.
+ * This function is currently non-functional as it depends on a removed helper.
  * 
- * It uses a dedicated collection `_health_checks` for this purpose.
- * 
- * @returns {Promise<{
- *   write: { success: boolean; message: string; },
- *   read: { success: boolean; message: string; }
- * }>} An object containing the success status and message for both write and read operations.
+ * @returns {Promise<any>} An object indicating failure.
  */
 export async function testFirestoreConnection() {
-  const db = getFirebaseDb();
+  console.error("testFirestoreConnection is currently disabled due to service refactoring.");
+  return {
+    write: { success: false, message: "Função de teste desabilitada." },
+    read: { success: false, message: "Função de teste desabilitada." },
+  };
+  
+  /*
+  // A lógica abaixo precisa ser adaptada para usar getFirebaseAdminDb() se for reativada.
+  const db = getFirebaseDb(); 
   const testDocId = `test_${Date.now()}`;
   const testDocRef = doc(db, "_health_checks", testDocId);
 
@@ -63,4 +68,5 @@ export async function testFirestoreConnection() {
   }
 
   return result;
+  */
 }

@@ -2,9 +2,11 @@
 "use server";
 
 import { z } from "zod";
-import { getPortfolio, updatePortfolio, addTransaction } from "@/services/users";
+import { getFirebaseAdminDb } from "@/firebase";
+import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from "next/cache";
 import { getInvestmentSuggestion } from "@/ai/flows/ai-investment-suggestions";
+import { getPortfolioAction } from "./user";
 
 export type FormState = {
   fieldErrors?: Record<string, string>;
@@ -64,13 +66,44 @@ const buyRoyaltiesSchema = z.object({
   userId: z.string().min(1, "ID de usuário inválido"),
 });
 
+
+async function addTransaction(userId: string, transaction: Omit<any, 'id' | 'date'>) {
+    const db = getFirebaseAdminDb();
+    const transactionsCollection = db.collection(`users/${userId}/transactions`);
+    await transactionsCollection.add({
+        ...transaction,
+        date: FieldValue.serverTimestamp(),
+    });
+}
+
+async function updatePortfolio(userId: string, updates: Partial<any>) {
+    const db = getFirebaseAdminDb();
+    const portfolioDocRef = db.collection("portfolios").doc(userId);
+    
+    const updateData: { [key: string]: any } = {};
+    if (updates.royalties !== undefined) {
+        updateData.royalties = FieldValue.increment(updates.royalties);
+    }
+    if (updates.totalInvested !== undefined) {
+        updateData.totalInvested = FieldValue.increment(updates.totalInvested);
+    }
+    if (updates.availableBalance !== undefined) {
+        updateData.availableBalance = FieldValue.increment(updates.availableBalance);
+    }
+    if (updates.monthlyGains !== undefined) {
+        updateData.monthlyGains = FieldValue.increment(updates.monthlyGains);
+    }
+
+    if (Object.keys(updateData).length > 0) {
+        await portfolioDocRef.set(updateData, { merge: true });
+    }
+}
+
 export async function buyRoyaltiesAction(formData: FormData) {
-  // This is a placeholder for a secure server-side session check.
   const userId = formData.get("userId") as string;
   if (!userId) {
       return { error: "Acesso negado. Usuário não autenticado." };
   }
-
 
   const parsed = buyRoyaltiesSchema.safeParse({
     quantity: formData.get("quantity"),
@@ -86,9 +119,6 @@ export async function buyRoyaltiesAction(formData: FormData) {
   const { quantity, totalCost, lang } = parsed.data;
 
   try {
-    
-    // In a real app, you would process payment here. We simulate success.
-
     await addTransaction(userId, {
       quantity: quantity,
       amount: totalCost,
@@ -96,14 +126,13 @@ export async function buyRoyaltiesAction(formData: FormData) {
     });
 
     await updatePortfolio(userId, {
-      royalties: quantity, // Incremental
-      totalInvested: totalCost, // Incremental
-      availableBalance: -totalCost, // Decremental
+      royalties: quantity, 
+      totalInvested: totalCost, 
+      availableBalance: -totalCost, 
     });
 
     revalidatePath(`/${lang}/dashboard`);
     revalidatePath(`/${lang}/dashboard/history`);
-
 
     return { success: "Compra de royalties realizada com sucesso!" };
 
@@ -139,7 +168,7 @@ export async function withdrawAction(formData: FormData) {
     const { amount, lang } = parsed.data;
 
     try {
-        const currentPortfolio = await getPortfolio(userId);
+        const currentPortfolio = await getPortfolioAction(userId);
         if (!currentPortfolio || currentPortfolio.availableBalance < amount) {
             return { error: "Saldo insuficiente para realizar o saque." };
         }

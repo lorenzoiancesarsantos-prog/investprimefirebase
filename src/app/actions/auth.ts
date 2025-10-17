@@ -2,8 +2,41 @@
 "use server";
 
 import { z } from "zod";
-import { createUserProfileAndPortfolio } from "@/services/users";
-import { getFirebaseAdminAuth } from "@/firebase";
+import { getFirebaseAdminDb, getFirebaseAdminAuth } from "@/firebase";
+import { FieldValue } from 'firebase-admin/firestore';
+import type { User, Portfolio } from '@/lib/types';
+
+
+async function createUserProfileAndPortfolio(uid: string, userData: { name: string, email: string }) {
+  const db = getFirebaseAdminDb();
+  const batch = db.batch();
+
+  const userRef = db.collection("users").doc(uid);
+  const newUser: Omit<User, 'id'> = {
+    name: userData.name,
+    email: userData.email,
+    phone: "",
+    registrationDate: FieldValue.serverTimestamp(),
+    invested: 0,
+    accountType: "Standard",
+    status: "active",
+    referralCode: `REF${uid.substring(0, 5).toUpperCase()}`,
+    role: "user",
+  };
+  batch.set(userRef, newUser);
+
+  const portfolioRef = db.collection("portfolios").doc(uid);
+  const newPortfolio: Portfolio = {
+    totalInvested: 0,
+    monthlyGains: 0,
+    royalties: 0,
+    availableBalance: 0,
+  };
+  batch.set(portfolioRef, newPortfolio);
+
+  await batch.commit();
+}
+
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Nome é obrigatório"),
@@ -44,8 +77,6 @@ export async function signupAction(values: unknown) {
           email: email,
       });
     } catch (firestoreError: any) {
-        // This is a critical failure. If we can't create the user profile,
-        // we should delete the auth user to avoid an inconsistent state.
         await auth.deleteUser(uid);
         console.error("Erro no Firestore durante o cadastro. Usuário do Auth deletado (rollback):", firestoreError);
         return { error: "Ocorreu um erro ao finalizar seu perfil. Por favor, tente novamente." };
@@ -56,7 +87,6 @@ export async function signupAction(values: unknown) {
   } catch (error: any) {
     console.error("Erro no cadastro (signupAction):", error.code, error.message);
     
-    // Duck typing to check if it's a Firebase Auth error
     if (error.code) {
         switch (error.code) {
             case 'auth/email-already-exists':
@@ -70,7 +100,6 @@ export async function signupAction(values: unknown) {
         }
     }
     
-    // Generic error for unexpected issues
     return { error: "Ocorreu um erro inesperado durante o cadastro. Tente novamente." };
   }
 }
