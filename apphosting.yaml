@@ -21,3 +21,5 @@ serving:
   minInstances: 0
   # The number of instances to run.
   maxInstances: 5
+
+# Trigger new build to fix expired URL issue
