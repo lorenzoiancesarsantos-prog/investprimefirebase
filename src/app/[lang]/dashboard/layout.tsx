@@ -6,8 +6,7 @@ import {
   LayoutDashboard,
   LineChart,
   Settings,
-  Landmark,
-  BrainCircuit
+  Landmark
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,7 +56,6 @@ export default function DashboardLayout({
     { href: `/${lang}/dashboard/history`, label: 'Histórico', icon: LineChart },
     { href: `/${lang}/dashboard/referrals`, label: 'Indique e Ganhe', icon: Handshake },
     { href: `/${lang}/dashboard/withdraw`, label: 'Saques', icon: Landmark },
-    { href: `/${lang}/dashboard/ai-advisor`, label: 'Consultor IA', icon: BrainCircuit },
     { href: `/${lang}/dashboard/settings`, label: 'Configurações', icon: Settings },
   ];
 
