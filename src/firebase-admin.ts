@@ -14,7 +14,7 @@ function getFirebaseAdminApp(): App {
     // This will only work in a Google Cloud environment (like App Hosting)
     // where default credentials are automatically available.
     console.log("Initializing Firebase Admin with Application Default Credentials");
-    return initializeApp();
+    return initializeApp({ projectId: process.env.GCLOUD_PROJECT });
   }
 
   // This part is for local development if you have a service account JSON.
