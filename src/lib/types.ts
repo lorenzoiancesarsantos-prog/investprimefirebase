@@ -6,7 +6,7 @@ export type User = {
   name: string;
   email: string;
   phone: string;
-  registrationDate: Timestamp | FieldValue | Date;
+  registrationDate: string;
   invested: number;
   accountType: 'Standard' | 'Premium' | 'VIP';
   status: 'active' | 'inactive';

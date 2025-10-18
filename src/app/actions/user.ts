@@ -8,17 +8,29 @@ import { FieldValue, Timestamp, FirestoreDataConverter, DocumentData } from 'fir
 // Helper to convert Firestore data, ensuring serializable dates
 const userFromFirestore = (doc: DocumentData): User => {
     const data = doc.data();
-    // Convert Timestamp to a serializable format (ISO string)
-    const registrationDate = data.registrationDate instanceof Timestamp 
-        ? data.registrationDate.toDate().toISOString() 
-        : data.registrationDate;
+    
+    let registrationDate: string;
+    if (data.registrationDate instanceof Timestamp) {
+        registrationDate = data.registrationDate.toDate().toISOString();
+    } else if (data.registrationDate) {
+        // Fallback for data that might not be a Timestamp
+        registrationDate = new Date(data.registrationDate).toISOString();
+    } else {
+        registrationDate = new Date().toISOString(); // Should not happen
+    }
 
     return {
         id: doc.id,
-        ...
-        data,
-        registrationDate, // Use the converted date
-    } as User;
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        invested: data.invested || 0,
+        accountType: data.accountType || 'Standard',
+        status: data.status || 'inactive',
+        referralCode: data.referralCode,
+        role: data.role || 'user',
+        registrationDate, // Use the converted, serializable date
+    };
 };
 
 export async function checkUserRoleAction(userId: string): Promise<'admin' | 'user'> {
@@ -101,7 +113,18 @@ export async function getPortfolioAction(userId: string): Promise<Portfolio | nu
     const docSnap = await portfolioDocRef.get();
 
     if (docSnap.exists) {
-        return docSnap.data() as Portfolio;
+        const data = docSnap.data();
+        // Manually reconstruct the object to ensure it's serializable
+        return {
+            totalValue: data?.totalValue || 0,
+            previousTotalValue: data?.previousTotalValue || 0,
+            totalInvested: data?.totalInvested || 0,
+            lifetimePnl: data?.lifetimePnl || 0,
+            monthlyGains: data?.monthlyGains || 0,
+            royalties: data?.royalties || 0,
+            availableBalance: data?.availableBalance || 0,
+            assets: data?.assets || [],
+        };
     } else {
         console.warn(`Portfolio for user ID ${userId} not found. Creating a new one.`);
         const newPortfolio: Portfolio = {
@@ -125,8 +148,9 @@ export async function getPortfolioAction(userId: string): Promise<Portfolio | nu
     }
 }
 
+
 const transactionConverter: FirestoreDataConverter<Transaction> = {
-  toFirestore(transaction: Transaction): DocumentData {
+  toFirestore(transaction: Omit<Transaction, 'id'>): DocumentData {
     return { 
       amount: transaction.amount,
       quantity: transaction.quantity,
@@ -153,3 +177,4 @@ export async function getTransactionsAction(userId: string): Promise<Transaction
   const querySnapshot = await q.get();
   return querySnapshot.docs.map(doc => doc.data());
 }
+
