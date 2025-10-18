@@ -1,56 +1,59 @@
 
-import { Timestamp, FieldValue } from "firebase/firestore";
-
 export type User = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  registrationDate: string;
-  invested: number;
-  accountType: 'Standard' | 'Premium' | 'VIP';
-  status: 'active' | 'inactive';
-  referralCode?: string;
-  role?: 'admin' | 'user';
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    invested: number;
+    accountType: 'Standard' | 'Premium';
+    status: 'active' | 'inactive' | 'suspended';
+    referralCode?: string;
+    role: 'user' | 'admin';
+    registrationDate: string;
+};
+
+export type Asset = {
+    id: string;
+    name: string;
+    quantity: number;
+    purchasePrice: number;
+    currentPrice: number;
+    totalValue: number;
 };
 
 export type Portfolio = {
-  totalValue: number;
-  previousTotalValue: number;
-  totalInvested: number;
-  lifetimePnl: number;
-  monthlyGains: number;
-  royalties: number;
-  availableBalance: number;
-  assets: any[]; 
+    totalValue: number;
+    previousTotalValue: number;
+    totalInvested: number;
+    lifetimePnl: number;
+    monthlyGains: number;
+    royalties: number;
+    availableBalance: number;
+    assets: Asset[];
 };
 
 export type Transaction = {
-  id: string;
-  date: string; // ISO 8601 format
-  quantity: number;
-  amount: number;
-  type: 'purchase' | 'withdrawal' | 'referral' | 'deposit';
-};
-
-export type Investment = {
     id: string;
-    userId: number;
-    userName: string;
+    date: string;
+    quantity: number;
     amount: number;
-    expectedReturn: number;
-    startDate: string; // formatted as string
-    duration: string;
-    status: 'active' | 'completed';
-}
+    type: 'purchase' | 'withdrawal' | 'referral' | 'deposit' | 'investment';
+};
 
 export type Campaign = {
     id: string;
-    name: string;
-    status: 'active' | 'paused' | 'ended';
+    title: string;
     description: string;
-    startDate: string; // formatted as string
-    endDate: string; // formatted as string
-    conversion: string;
-    targetAudience: string;
-}
+    goal: number;
+    pledged: number;
+    deadline: string;
+    status: 'active' | 'inactive';
+};
+
+export type Notification = {
+    id: string;
+    userId: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+};

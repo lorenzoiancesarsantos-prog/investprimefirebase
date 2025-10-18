@@ -6,7 +6,7 @@ import { getFirebaseAdminDb } from "@/firebase-admin";
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from "next/cache";
 import { getPortfolioAction } from "./user";
-
+import type { Portfolio, Transaction } from "@/lib/types";
 
 const buyRoyaltiesSchema = z.object({
   quantity: z.coerce.number().min(1, "A quantidade deve ser de pelo menos 1."),
@@ -15,32 +15,36 @@ const buyRoyaltiesSchema = z.object({
   userId: z.string().min(1, "ID de usuário inválido"),
 });
 
-
-async function addTransaction(userId: string, transaction: Omit<any, 'id' | 'date'>) {
+async function addTransaction(userId: string, transactionData: Omit<Transaction, 'id' | 'date'>) {
     const db = getFirebaseAdminDb();
+    // Get a standard collection reference without the converter for write operations
     const transactionsCollection = db.collection(`users/${userId}/transactions`);
+
+    // Manually construct the data object and set the server timestamp
     await transactionsCollection.add({
-        ...transaction,
+        ...transactionData,
         date: FieldValue.serverTimestamp(),
     });
 }
 
-async function updatePortfolio(userId: string, updates: Partial<any>) {
+type PortfolioUpdate = {
+    [K in keyof Portfolio]?: number;
+};
+
+async function updatePortfolio(userId: string, updates: PortfolioUpdate) {
     const db = getFirebaseAdminDb();
     const portfolioDocRef = db.collection("portfolios").doc(userId);
     
-    const updateData: { [key: string]: any } = {};
-    if (updates.royalties !== undefined) {
-        updateData.royalties = FieldValue.increment(updates.royalties);
-    }
-    if (updates.totalInvested !== undefined) {
-        updateData.totalInvested = FieldValue.increment(updates.totalInvested);
-    }
-    if (updates.availableBalance !== undefined) {
-        updateData.availableBalance = FieldValue.increment(updates.availableBalance);
-    }
-    if (updates.monthlyGains !== undefined) {
-        updateData.monthlyGains = FieldValue.increment(updates.monthlyGains);
+    const updateData: { [key: string]: FieldValue } = {};
+
+    for (const key in updates) {
+        if (Object.prototype.hasOwnProperty.call(updates, key)) {
+            const typedKey = key as keyof PortfolioUpdate;
+            const value = updates[typedKey];
+            if (typeof value === 'number') {
+                updateData[typedKey] = FieldValue.increment(value);
+            }
+        }
     }
 
     if (Object.keys(updateData).length > 0) {

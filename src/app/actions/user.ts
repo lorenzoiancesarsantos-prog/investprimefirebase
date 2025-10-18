@@ -3,9 +3,10 @@
 
 import { getFirebaseAdminDb, getFirebaseAdminAuth } from '@/firebase-admin';
 import type { User, Portfolio, Transaction } from '@/lib/types';
-import { FieldValue, Timestamp, FirestoreDataConverter, DocumentData } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { transactionConverter } from '@/lib/converters';
 
-const userFromFirestore = (doc: DocumentData): User => {
+const userFromFirestore = (doc: any): User => {
     const data = doc.data();
     
     let registrationDate: string;
@@ -62,7 +63,8 @@ export async function updateUserAction(user: User): Promise<void> {
   const userDocRef = db.collection('users').doc(user.id);
   
   const dataToUpdate: Partial<User> = { ...user };
-  delete dataToUpdate.id;
+  delete dataToUpdate.id; // Prevent updating the ID
+  delete dataToUpdate.registrationDate; // CRITICAL: Prevent overwriting the server timestamp with a client-side string
 
   await userDocRef.set(dataToUpdate, { merge: true });
 }
@@ -147,29 +149,6 @@ export async function getPortfolioAction(userId: string): Promise<Portfolio | nu
         }
     }
 }
-
-
-const transactionConverter: FirestoreDataConverter<Transaction> = {
-  toFirestore(transaction): DocumentData {
-    const date = transaction.date ? new Date(transaction.date) : new Date();
-    return { 
-      amount: transaction.amount,
-      quantity: transaction.quantity,
-      type: transaction.type,
-      date: Timestamp.fromDate(date),
-     };
-  },
-  fromFirestore(snapshot): Transaction {
-    const data = snapshot.data();
-    return {
-      id: snapshot.id,
-      amount: data.amount,
-      quantity: data.quantity,
-      type: data.type,
-      date: (data.date as Timestamp).toDate().toISOString(),
-    };
-  },
-};
 
 export async function getTransactionsAction(userId: string): Promise<Transaction[]> {
   const db = getFirebaseAdminDb();
