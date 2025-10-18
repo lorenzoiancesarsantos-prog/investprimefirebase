@@ -2,7 +2,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -24,25 +23,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ],
-  },
-  webpack: (config, { isServer }) => {
-    config.experiments = { ...config.experiments, asyncWebAssembly: true };
-
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        net: false,
-        tls: false,
-        fs: false,
-      };
-    }
-    
-    config.module.rules.push({
-        test: /\.wasm$/,
-        type: "webassembly/async",
-    });
-
-    return config;
   },
 };
 
