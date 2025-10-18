@@ -102,9 +102,28 @@ export async function getPortfolioAction(userId: string): Promise<Portfolio | nu
 
   if (docSnap.exists) {
     return docSnap.data() as Portfolio;
+  } else {
+    // If portfolio does not exist, create a new one
+    console.warn(`Portfolio for user ID ${userId} not found. Creating a new one.`);
+    const newPortfolio: Portfolio = {
+      totalValue: 0,
+      previousTotalValue: 0,
+      totalInvested: 0,
+      lifetimePnl: 0,
+      assets: [],
+    };
+
+    try {
+      // Save the new portfolio to Firestore
+      await portfolioDocRef.set(newPortfolio);
+      // Return the newly created portfolio
+      return newPortfolio;
+    } catch (error) {
+      console.error(`Failed to create a new portfolio for user ${userId}:`, error);
+      // If creation fails, return null
+      return null;
+    }
   }
-  console.warn(`Portfolio for user ID ${userId} not found in Firestore.`);
-  return null;
 }
 
 const transactionConverter: FirestoreDataConverter<Transaction> = {
