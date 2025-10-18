@@ -7,6 +7,11 @@ runtime: nodejs20
 build: npm run build
 # The command to run to start the server.
 run: npm run start
+
+env:
+  - variable: SERVICE_ACCOUNT
+    secret: SERVICE_ACCOUNT_JSON
+
 # The number of instances to run.
 # This is a optional field and if not provided, the default value is 1.
 # For more information, see https://firebase.google.com/docs/app-hosting/reference/apphosting-yaml.
@@ -21,5 +26,3 @@ serving:
   minInstances: 0
   # The number of instances to run.
   maxInstances: 5
-
-# Trigger new build to fix expired URL issue
