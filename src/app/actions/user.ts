@@ -5,12 +5,19 @@ import { getFirebaseAdminDb, getFirebaseAdminAuth } from '@/firebase-admin';
 import type { User, Portfolio, Transaction } from '@/lib/types';
 import { FieldValue, Timestamp, FirestoreDataConverter, DocumentData } from 'firebase-admin/firestore';
 
-// Helper para converter dados do Firestore
-const userFromFirestore = (docSnap: DocumentData): User => {
-    const data = docSnap.data();
+// Helper to convert Firestore data, ensuring serializable dates
+const userFromFirestore = (doc: DocumentData): User => {
+    const data = doc.data();
+    // Convert Timestamp to a serializable format (ISO string)
+    const registrationDate = data.registrationDate instanceof Timestamp 
+        ? data.registrationDate.toDate().toISOString() 
+        : data.registrationDate;
+
     return {
-        id: docSnap.id,
-        ...data,
+        id: doc.id,
+        ...
+        data,
+        registrationDate, // Use the converted date
     } as User;
 };
 
