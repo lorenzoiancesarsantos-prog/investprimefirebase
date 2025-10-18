@@ -1,47 +1,70 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Wallet, TrendingUp, Coins, CircleDollarSign, ArrowUp } from "lucide-react";
+
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Portfolio } from "@/lib/types";
 
-function StatCard({ title, value, change, icon: Icon }: { title: string, value: string, change?: string, icon: React.ElementType }) {
-  return (
-     <div className="stat-card bg-primary/5 border border-primary/20 rounded-md p-4 text-center transition-all hover:shadow-lg hover:-translate-y-1 relative overflow-hidden before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-primary/10 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
-        <div className="stat-value text-2xl font-bold text-primary mb-1">{value}</div>
-        <div className="stat-label text-muted-foreground text-sm mb-1">{title}</div>
-        {change && (
-          <div className="stat-change text-xs text-green-400 flex items-center justify-center gap-1">
-              <ArrowUp className="h-3 w-3" /> {change}
-          </div>
-        )}
-    </div>
-  )
+interface OverviewCardsProps {
+  portfolio: Portfolio | null;
 }
 
+export function OverviewCards({ portfolio }: OverviewCardsProps) {
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
 
-export function OverviewCards({ portfolio }: { portfolio: Portfolio }) {
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
+  if (!portfolio) {
+    return (
+      <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-5 w-3/5" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-4/5" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><Wallet className="text-primary" /> Minha Carteira</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Investido" value={formatCurrency(portfolio.totalInvested)} change="+5.5%" icon={Wallet} />
-          <StatCard title="Ganhos Mensais" value={formatCurrency(portfolio.monthlyGains)} change="+5.5%" icon={TrendingUp} />
-          <StatCard title="Royalties" value={String(portfolio.royalties)} icon={Coins} />
-          <StatCard title="Disponível para Saque" value={formatCurrency(portfolio.availableBalance)} change="+100%" icon={CircleDollarSign} />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Valor Total da Carteira</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{formatCurrency(portfolio.totalValue)}</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ganhos Mensais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{formatCurrency(portfolio.monthlyGains)}</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Royalties</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{formatCurrency(portfolio.royalties)}</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Saldo Disponível</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{formatCurrency(portfolio.availableBalance)}</p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
