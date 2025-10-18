@@ -85,6 +85,7 @@ export async function signupAction(values: unknown) {
     return { success: true, userId: uid };
 
   } catch (error: any) {
+    console.error("SIGNUP_ACTION_CAUGHT_ERROR_FINAL_TEST");
     console.error("Erro detalhado no cadastro (signupAction):", JSON.stringify(error, null, 2));
     
     if (error.code) {
