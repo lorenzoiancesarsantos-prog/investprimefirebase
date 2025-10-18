@@ -1,28 +1,31 @@
 
-import { getTransactionsAction } from "@/app/actions/user";
+'use client';
 import { HistoryClientPage } from "@/components/dashboard/history-client-page";
-import { getFirebaseAdminAuth } from "@/firebase-admin";
-import { cookies } from "next/headers";
-import { redirect } from 'next/navigation';
+import { getTransactionsAction } from "@/app/actions/user";
+import { getFirebaseAuth } from "@/firebase";
+import { useEffect, useState } from "react";
+import type { Transaction } from "@/lib/types";
 
-async function getAuthenticatedUser() {
-  try {
-    const token = (await cookies()).get("__session")?.value;
-    if (!token) return null;
-    return await getFirebaseAdminAuth().verifySessionCookie(token, true);
-  } catch (error) {
-    return null;
+export default function HistoryPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const auth = getFirebaseAuth();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const fetchedTransactions = await getTransactionsAction(user.uid);
+        setTransactions(fetchedTransactions);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
+  if (loading) {
+      return <div>Carregando histórico...</div>
   }
-}
-
-export default async function HistoryPage({ params }: { params: { lang: string } }) {
-  const authenticatedUser = await getAuthenticatedUser();
-
-  if (!authenticatedUser) {
-    redirect(`/${params.lang}/login`);
-  }
-
-  const transactions = await getTransactionsAction(authenticatedUser.uid);
 
   return <HistoryClientPage initialTransactions={transactions} />;
 }
