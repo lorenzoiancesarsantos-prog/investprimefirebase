@@ -1,12 +1,11 @@
 
 "use server";
 
-console.log("AUTH_TS: File loading...");
-
 import { z } from "zod";
 import { getFirebaseAdminDb, getFirebaseAdminAuth } from "@/firebase-admin";
 import { FieldValue } from 'firebase-admin/firestore';
 import type { User, Portfolio } from '@/lib/types';
+
 
 async function createUserProfileAndPortfolio(uid: string, userData: { name: string, email: string }) {
   const db = getFirebaseAdminDb();
@@ -46,7 +45,6 @@ const signupSchema = z.object({
 });
 
 export async function signupAction(values: unknown) {
-  console.log("AUTH_TS: signupAction() called.");
   const parsed = signupSchema.safeParse(values);
 
   if (!parsed.success) {
@@ -87,7 +85,6 @@ export async function signupAction(values: unknown) {
     return { success: true, userId: uid };
 
   } catch (error: any) {
-    console.error("SIGNUP_ACTION_CAUGHT_ERROR_FINAL_TEST");
     console.error("Erro detalhado no cadastro (signupAction):", JSON.stringify(error, null, 2));
     
     if (error.code) {
@@ -106,5 +103,3 @@ export async function signupAction(values: unknown) {
     return { error: "Ocorreu um erro inesperado durante o cadastro. Tente novamente." };
   }
 }
-
-console.log("AUTH_TS: File loaded successfully.");
