@@ -7,7 +7,7 @@ import DashboardClientPage from "@/components/dashboard/dashboard-client-page";
 
 async function getAuthenticatedUser() {
   try {
-    const token = cookies().get("__session")?.value;
+    const token = (await cookies()).get("__session")?.value;
     if (!token) return null;
     return await getFirebaseAdminAuth().verifySessionCookie(token, true);
   } catch (error) {
