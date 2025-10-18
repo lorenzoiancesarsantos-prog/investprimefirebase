@@ -6,7 +6,8 @@ import {
   LayoutDashboard,
   LineChart,
   Settings,
-  Landmark
+  Landmark,
+  BrainCircuit
 } from "lucide-react";
 import {
   Sidebar,
@@ -21,7 +22,7 @@ import {
 import { Logo } from "@/components/logo";
 import { Header } from "@/components/dashboard/header";
 import { UserNav } from "@/components/dashboard/user-nav";
-import { getUserAction } from "@/app/actions/user"; // Alterado para Server Action
+import { getUserAction } from "@/app/actions/user"; 
 import { getFirebaseAuth } from "@/firebase";
 import { useEffect, useState } from "react";
 import type { User } from "@/lib/types";
@@ -41,7 +42,7 @@ export default function DashboardLayout({
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        const userData = await getUserAction(firebaseUser.uid); // Alterado para Server Action
+        const userData = await getUserAction(firebaseUser.uid); 
         setUser(userData);
       } else {
         setUser(null);
@@ -55,6 +56,7 @@ export default function DashboardLayout({
   const getNavItems = (lang: string) => [
     { href: `/${lang}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
     { href: `/${lang}/dashboard/history`, label: 'Histórico', icon: LineChart },
+    { href: `/${lang}/dashboard/ai-advisor`, label: 'Consultor IA', icon: BrainCircuit },
     { href: `/${lang}/dashboard/referrals`, label: 'Indique e Ganhe', icon: Handshake },
     { href: `/${lang}/dashboard/withdraw`, label: 'Saques', icon: Landmark },
     { href: `/${lang}/dashboard/settings`, label: 'Configurações', icon: Settings },

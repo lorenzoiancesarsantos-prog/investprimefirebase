@@ -1,102 +1,202 @@
 
 'use client';
-import Link from "next/link";
-import {
-  Handshake,
-  LayoutDashboard,
-  LineChart,
-  Settings,
-  Landmark
-} from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-  SidebarInset,
-} from "@/components/ui/sidebar";
-import { Logo } from "@/components/logo";
-import { Header } from "@/components/dashboard/header";
-import { UserNav } from "@/components/dashboard/user-nav";
-import { getUserAction } from "@/app/actions/user"; // Alterado para Server Action
-import { getFirebaseAuth } from "@/firebase";
-import { useEffect, useState } from "react";
-import type { User } from "@/lib/types";
-import { useParams } from "next/navigation";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { BrainCircuit, Bot, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { getInvestmentSuggestion, InvestmentProfile, InvestmentProfileSchema, InvestmentSuggestion } from '@/ai/flows/ai-investment-suggestions';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const params = useParams();
-  const lang = params.lang as string;
+export default function AIAdvisorPage() {
+  const [suggestion, setSuggestion] = useState<InvestmentSuggestion | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const auth = getFirebaseAuth();
-    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-      if (firebaseUser) {
-        const userData = await getUserAction(firebaseUser.uid); // Alterado para Server Action
-        setUser(userData);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
+  const form = useForm<InvestmentProfile>({
+    resolver: zodResolver(InvestmentProfileSchema),
+    defaultValues: {
+      investmentObjective: '',
+      riskProfile: 'moderado',
+      availableBalance: 1000,
+      monthlyInvestment: 200,
+    },
+  });
 
-    return () => unsubscribe();
-  }, []);
+  const onSubmit = async (data: InvestmentProfile) => {
+    setIsLoading(true);
+    setError(null);
+    setSuggestion(null);
 
-  const getNavItems = (lang: string) => [
-    { href: `/${lang}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
-    { href: `/${lang}/dashboard/history`, label: 'Histórico', icon: LineChart },
-    { href: `/${lang}/dashboard/referrals`, label: 'Indique e Ganhe', icon: Handshake },
-    { href: `/${lang}/dashboard/withdraw`, label: 'Saques', icon: Landmark },
-    { href: `/${lang}/dashboard/settings`, label: 'Configurações', icon: Settings },
-  ];
-
-  const navItems = getNavItems(lang);
+    try {
+      const result = await getInvestmentSuggestion(data);
+      setSuggestion(result);
+    } catch (e) {
+      console.error(e);
+      setError('Ocorreu um erro ao gerar a sugestão. Por favor, tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <SidebarProvider>
-      <Sidebar side="left" collapsible="icon" variant="sidebar">
-        <SidebarHeader>
-          <Logo />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild tooltip={item.label}>
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset className="flex flex-col">
-        <Header>
-           {loading ? (
-             <div>Carregando...</div>
-           ) : user ? (
-            <UserNav user={{ fullName: user.name, email: user.email, avatarUrl: `https://picsum.photos/seed/${user.id}/100/100` }} lang={lang} />
-           ) : (
-             <div></div>
-           )}
-        </Header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-4">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
+          <BrainCircuit className="h-8 w-8 text-primary" />
+          Consultor de Investimentos IA
+        </h1>
+        <p className="text-muted-foreground">
+          Preencha seu perfil para receber uma sugestão de investimento personalizada.
+        </p>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Seu Perfil de Investidor</CardTitle>
+            <CardDescription>
+              Quanto mais precisas as informações, melhor será a recomendação.
+            </CardDescription>
+          </CardHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="investmentObjective"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Qual seu objetivo principal?</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Aposentadoria, comprar um imóvel..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="riskProfile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Perfil de Risco</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione seu perfil" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="conservador">Conservador</SelectItem>
+                          <SelectItem value="moderado">Moderado</SelectItem>
+                          <SelectItem value="agressivo">Agressivo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="availableBalance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valor Disponível (R$)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="monthlyInvestment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Aporte Mensal (R$)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  {isLoading ? 'Analisando...' : 'Gerar Sugestão'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="text-primary" />
+              Sugestão da IA
+            </CardTitle>
+            <CardDescription>
+              Com base nos seus dados, aqui está uma estratégia recomendada.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="min-h-[300px] flex items-center justify-center">
+            {isLoading && (
+              <div className="text-center text-muted-foreground">
+                <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+                <p className="mt-4">Processando sua solicitação...</p>
+              </div>
+            )}
+            {error && (
+              <div className="text-center text-destructive-foreground bg-destructive/20 p-6 rounded-lg">
+                <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
+                <p className="mt-4 font-semibold">Erro ao gerar sugestão</p>
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+            {suggestion && (
+              <div className="space-y-6 text-sm animate-fade-in">
+                <div>
+                  <h4 className="font-bold text-primary text-base mb-1">Resumo da Análise</h4>
+                  <p className="text-muted-foreground">{suggestion.analysisSummary}</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-primary text-base mb-1">Estratégia Sugerida</h4>
+                  <p className="text-muted-foreground">{suggestion.suggestedStrategy}</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-primary text-base mb-1">Justificativa</h4>
+                  <p className="text-muted-foreground">{suggestion.rationale}</p>
+                </div>
+              </div>
+            )}
+            {!isLoading && !suggestion && !error && (
+              <div className="text-center text-muted-foreground">
+                <p>Preencha o formulário para ver sua sugestão.</p>
+              </div>
+            )}
+          </CardContent>
+           <CardFooter>
+                <p className="text-xs text-muted-foreground">
+                    Atenção: Esta é uma sugestão gerada por IA e não constitui uma recomendação financeira profissional. Invista com consciência dos riscos.
+                </p>
+           </CardFooter>
+        </Card>
+      </div>
+    </div>
   );
 }
