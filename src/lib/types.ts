@@ -15,10 +15,14 @@ export type User = {
 };
 
 export type Portfolio = {
+  totalValue: number;
+  previousTotalValue: number;
   totalInvested: number;
+  lifetimePnl: number;
   monthlyGains: number;
   royalties: number;
   availableBalance: number;
+  assets: any[]; 
 };
 
 export type Transaction = {

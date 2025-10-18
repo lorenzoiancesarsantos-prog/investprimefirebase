@@ -92,38 +92,37 @@ export async function getUserAction(userId: string): Promise<User | null> {
 }
 
 export async function getPortfolioAction(userId: string): Promise<Portfolio | null> {
-  if (!userId) {
-    console.warn('getPortfolioAction called with no userId');
-    return null;
-  }
-  const db = getFirebaseAdminDb();
-  const portfolioDocRef = db.collection('portfolios').doc(userId);
-  const docSnap = await portfolioDocRef.get();
-
-  if (docSnap.exists) {
-    return docSnap.data() as Portfolio;
-  } else {
-    // If portfolio does not exist, create a new one
-    console.warn(`Portfolio for user ID ${userId} not found. Creating a new one.`);
-    const newPortfolio: Portfolio = {
-      totalValue: 0,
-      previousTotalValue: 0,
-      totalInvested: 0,
-      lifetimePnl: 0,
-      assets: [],
-    };
-
-    try {
-      // Save the new portfolio to Firestore
-      await portfolioDocRef.set(newPortfolio);
-      // Return the newly created portfolio
-      return newPortfolio;
-    } catch (error) {
-      console.error(`Failed to create a new portfolio for user ${userId}:`, error);
-      // If creation fails, return null
-      return null;
+    if (!userId) {
+        console.warn("getPortfolioAction called with no userId");
+        return null;
     }
-  }
+    const db = getFirebaseAdminDb();
+    const portfolioDocRef = db.collection("portfolios").doc(userId);
+    const docSnap = await portfolioDocRef.get();
+
+    if (docSnap.exists) {
+        return docSnap.data() as Portfolio;
+    } else {
+        console.warn(`Portfolio for user ID ${userId} not found. Creating a new one.`);
+        const newPortfolio: Portfolio = {
+            totalValue: 0,
+            previousTotalValue: 0,
+            totalInvested: 0,
+            lifetimePnl: 0,
+            monthlyGains: 0,
+            royalties: 0,
+            availableBalance: 0,
+            assets: [],
+        };
+
+        try {
+            await portfolioDocRef.set(newPortfolio);
+            return newPortfolio;
+        } catch (error) {
+            console.error(`Failed to create a new portfolio for user ${userId}:`, error);
+            return null;
+        }
+    }
 }
 
 const transactionConverter: FirestoreDataConverter<Transaction> = {
