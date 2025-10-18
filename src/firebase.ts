@@ -2,7 +2,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import 'firebase/firestore'; // Import for side effects
 
 const firebaseConfig = {
     apiKey: "AIzaSyCOdAv8886YidVLgzYrHmO6G9c0_xyKg10",
@@ -14,20 +13,30 @@ const firebaseConfig = {
 };
 
 let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
 
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+function getClientFirebaseApp() {
+    if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
+    }
+    return app;
 }
 
-const auth = getAuth(app);
-const db = getFirestore(app);
-
 export function getFirebaseAuth(): Auth {
-  return auth;
+    if (!auth) {
+        const app = getClientFirebaseApp();
+        auth = getAuth(app);
+    }
+    return auth;
 }
 
 export function getFirestoreDb(): Firestore {
-  return db;
+    if (!db) {
+        const app = getClientFirebaseApp();
+        db = getFirestore(app);
+    }
+    return db;
 }
