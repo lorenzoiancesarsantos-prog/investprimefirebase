@@ -9,32 +9,32 @@ function getFirebaseAdminApp(): App {
     return getApp();
   }
 
-  // When deployed to a Google Cloud environment like App Hosting, GCLOUD_PROJECT is automatically set.
-  // This is the signal to use Application Default Credentials.
+  // Quando implantado em um ambiente do Google Cloud como o App Hosting, GCLOUD_PROJECT é definido automaticamente.
+  // Este é o sinal para usar as Credenciais Padrão da Aplicação.
   if (process.env.GCLOUD_PROJECT) {
-    console.log("Google Cloud environment detected. Initializing Firebase Admin with Application Default Credentials.");
+    console.log("Ambiente Google Cloud detectado. Inicializando Firebase Admin com Credenciais Padrão da Aplicação.");
     return initializeApp();
   }
 
-  // The following logic is for local development, where you'd use a service account JSON file.
+  // A lógica a seguir é para desenvolvimento local, onde você usaria um arquivo JSON de conta de serviço.
   const serviceAccount = process.env.SERVICE_ACCOUNT;
   if (!serviceAccount) {
-    throw new Error("The SERVICE_ACCOUNT environment variable is not set. This is required for local development.");
+    throw new Error("A variável de ambiente SERVICE_ACCOUNT não está definida. Isso é necessário para o desenvolvimento local.");
   }
 
   try {
-    console.log("Local development environment detected. Initializing Firebase Admin with service account JSON.");
+    console.log("Ambiente de desenvolvimento local detectado. Inicializando Firebase Admin com JSON da conta de serviço.");
     const serviceAccountJson = JSON.parse(serviceAccount);
     return initializeApp({
       credential: admin.credential.cert(serviceAccountJson),
     });
   } catch (e) {
-    console.error("Failed to parse the SERVICE_ACCOUNT environment variable. Make sure it's a valid JSON string.", e);
-    throw new Error("Could not initialize Firebase Admin SDK for local development. The SERVICE_ACCOUNT variable is malformed.");
+    console.error("Falha ao analisar a variável de ambiente SERVICE_ACCOUNT. Certifique-se de que é uma string JSON válida.", e);
+    throw new Error("Não foi possível inicializar o SDK Admin do Firebase para desenvolvimento local. A variável SERVICE_ACCOUNT está malformada.");
   }
 }
 
-// Initialize the app once when the module is loaded.
+// Inicializa o app uma vez quando o módulo é carregado.
 const app = getFirebaseAdminApp();
 
 export function getFirebaseAdminAuth(): AdminAuth {
