@@ -21,7 +21,8 @@ import { useState } from "react";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/firebase";
-import { checkUserRoleAction } from "@/app/actions/user"; // Importando a Server Action
+import { checkUserRoleAction } from "@/app/actions/user";
+import { loginAction } from "@/app/actions/auth"; // Importando a nova loginAction
 
 const formSchema = z.object({
   email: z.string().email({
@@ -55,11 +56,23 @@ export function LoginForm() {
     const { email, password } = values;
     
     try {
+      // 1. Autenticar no lado do cliente
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userId = userCredential.user.uid;
+      const user = userCredential.user;
 
-      // Chamando a Server Action para verificar o papel do usuário
-      const role = await checkUserRoleAction(userId);
+      // 2. Obter o ID Token do usuário
+      const idToken = await user.getIdToken();
+
+      // 3. Chamar a Server Action para criar o cookie de sessão
+      const sessionResult = await loginAction({ idToken });
+
+      if (sessionResult.error) {
+        // Se a criação da sessão no servidor falhar, lançar um erro
+        throw new Error(sessionResult.error);
+      }
+
+      // 4. A sessão do servidor foi criada. Agora, verificar o papel para redirecionar.
+      const role = await checkUserRoleAction(user.uid);
 
       setIsLoading(false);
 
@@ -80,11 +93,26 @@ export function LoginForm() {
     } catch (error: any) {
       setIsLoading(false);
       let errorMessage = "Ocorreu um erro ao fazer login. Tente novamente.";
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        errorMessage = "E-mail ou senha inválidos.";
-      } else if (error.code === 'auth/configuration-not-found') {
-        errorMessage = 'A configuração do Firebase para este aplicativo não foi encontrada. Verifique se sua chave de API está correta.';
+      
+      // Tratar erros do Firebase Auth
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+          case 'auth/invalid-credential':
+            errorMessage = "E-mail ou senha inválidos.";
+            break;
+          case 'auth/configuration-not-found':
+            errorMessage = 'A configuração do Firebase não foi encontrada.';
+            break;
+          default:
+            errorMessage = "Falha na autenticação. Verifique as suas credenciais.";
+        }
+      } else if (error.message) {
+        // Tratar erros da nossa Server Action
+        errorMessage = error.message;
       }
+
       toast({
         title: "Erro de Login",
         description: errorMessage,
