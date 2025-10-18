@@ -30,9 +30,9 @@ export default async function DashboardPage({ params }: { params: { lang: string
   ]);
 
   if (!user || !portfolio) {
-    // This could happen if Firestore data is missing for an authenticated user
-    // Or if there was an error fetching data.
-    return <div>Não foi possível carregar os dados do dashboard. Tente fazer login novamente.</div>;
+    // This could happen if Firestore data is missing for an authenticated user.
+    // It's safer to redirect to login to re-establish the session.
+    redirect(`/${params.lang}/login`);
   }
 
   return <DashboardClientPage user={user} portfolio={portfolio} transactions={transactions} />;

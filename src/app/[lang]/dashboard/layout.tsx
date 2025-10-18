@@ -36,32 +36,26 @@ export default function DashboardLayout({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const params = useParams();
-  const router = useRouter();
   const pathname = usePathname();
   const lang = params.lang as string;
   const auth = getFirebaseAuth();
 
   useEffect(() => {
+    // This effect's primary purpose is to fetch the user data for the navigation bar.
+    // The actual route protection is handled by the server component page.
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        // Fetch user data only for the UserNav, not for the whole page content
         const userData = await getUserAction(firebaseUser.uid); 
-        if (userData) {
-          setUser(userData);
-        } else {
-          // User exists in Auth but not in Firestore, redirect to login
-          auth.signOut(); 
-          router.replace(`/${lang}/login`);
-        }
+        setUser(userData);
       } else {
-        // No user, redirect to login
-        router.replace(`/${lang}/login`);
+        // If the user logs out, clear the state. The page component will handle redirection.
+        setUser(null);
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [lang, router, auth]);
+  }, [auth]);
 
   const getNavItems = (lang: string) => [
     { href: `/${lang}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
@@ -75,14 +69,11 @@ export default function DashboardLayout({
   const navItems = getNavItems(lang);
   
   const checkActive = (href: string) => {
-    // For the main dashboard, we want an exact match.
     if (href.endsWith('/dashboard')) {
         return pathname === href;
     }
-    // For other links, we check if the pathname starts with the href.
     return pathname.startsWith(href);
   };
-
 
   if (loading) {
     return (
@@ -90,11 +81,6 @@ export default function DashboardLayout({
             <p>Carregando...</p>
         </div>
     )
-  }
-  
-  if (!user) {
-    // This can be a brief flash while redirecting, or a fallback.
-    return null;
   }
 
   return (
@@ -120,7 +106,7 @@ export default function DashboardLayout({
       </Sidebar>
       <SidebarInset className="flex flex-col">
         <Header>
-           <UserNav user={{ fullName: user.name, email: user.email, avatarUrl: `https://picsum.photos/seed/${user.id}/100/100` }} lang={lang} />
+           {user && <UserNav user={{ fullName: user.name, email: user.email, avatarUrl: `https://picsum.photos/seed/${user.id}/100/100` }} lang={lang} />}
         </Header>
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-4">
           {children}
