@@ -4,15 +4,16 @@
 import { OverviewCards } from "@/components/dashboard/overview-cards";
 import { InvestmentChart } from "@/components/dashboard/investment-chart";
 import { RecentPurchases } from "@/components/dashboard/recent-purchases";
-import { HistoryPage } from "../../app/[lang]/dashboard/history/page";
-import type { User, Portfolio } from "@/lib/types";
+import { HistoryClientPage } from "@/components/dashboard/history-client-page";
+import type { User, Portfolio, Transaction } from "@/lib/types";
 
 interface DashboardClientPageProps {
   user: User;
   portfolio: Portfolio;
+  transactions: Transaction[];
 }
 
-export default function DashboardClientPage({ user, portfolio }: DashboardClientPageProps) {
+export default function DashboardClientPage({ user, portfolio, transactions }: DashboardClientPageProps) {
   if (!user || !portfolio) {
     return <div>Não foi possível carregar os dados. Faça o login novamente.</div>;
   }
@@ -36,7 +37,7 @@ export default function DashboardClientPage({ user, portfolio }: DashboardClient
       </div>
       <div className="grid gap-8 lg:grid-cols-5">
          <div className="lg:col-span-5">
-            <HistoryPage />
+            <HistoryClientPage initialTransactions={transactions} />
          </div>
       </div>
     </div>
