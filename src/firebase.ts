@@ -1,9 +1,8 @@
-// src/firebase.ts
+
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
-// --- Configuração do Cliente (Navegador) ---
 const firebaseConfig = {
     apiKey: "AIzaSyCOdAv8886YidVLgzYrHmO6G9c0_xyKg10",
     authDomain: "studio-7505780173-ba373.firebaseapp.com",
@@ -24,6 +23,6 @@ export function getFirebaseAuth(): Auth {
   return getAuth(getClientFirebaseApp());
 }
 
-export function getFirebaseDb(): Firestore {
+export function getFirestoreDb(): Firestore {
   return getFirestore(getClientFirebaseApp());
 }
