@@ -2,7 +2,6 @@
 'use client';
 import { genkit, type GenkitOptions } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { firebase } from '@genkit-ai/firebase';
 import {
   definePrompt,
   generate,
@@ -30,7 +29,7 @@ import {
 //       used in both client and server components.
 
 const genkitOptions: GenkitOptions = {
-  plugins: [googleAI(), firebase()],
+  plugins: [googleAI()],
   logLevel: 'debug',
   enableTracing: true,
 };
