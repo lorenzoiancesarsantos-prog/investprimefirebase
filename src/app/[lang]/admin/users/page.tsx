@@ -63,7 +63,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { getUsersAction, addUserAction, updateUserAction, deleteUserAction } from '@/app/actions/user';
-import { Timestamp } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 
 
@@ -73,9 +72,9 @@ const formatCurrency = (value: number) =>
     currency: 'BRL',
   }).format(value);
 
-const formatDate = (timestamp: Timestamp | Date | any) => {
-    if (!timestamp) return '-';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.seconds * 1000);
+const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', {
         day: '2-digit',
         month: '2-digit',

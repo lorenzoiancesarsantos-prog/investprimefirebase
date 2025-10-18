@@ -4,7 +4,6 @@
 import { z } from "zod";
 import { getFirebaseAdminDb } from "@/firebase-admin";
 import { FieldValue } from 'firebase-admin/firestore';
-import { revalidatePath } from "next/cache";
 import { getPortfolioAction } from "./user";
 import type { Portfolio, Transaction } from "@/lib/types";
 
@@ -84,9 +83,6 @@ export async function buyRoyaltiesAction(formData: FormData) {
       availableBalance: -totalCost, 
     });
 
-    revalidatePath(`/${lang}/dashboard`);
-    revalidatePath(`/${lang}/dashboard/history`);
-
     return { success: "Compra de royalties realizada com sucesso!" };
 
   } catch (error) {
@@ -135,10 +131,6 @@ export async function withdrawAction(formData: FormData) {
         await updatePortfolio(userId, {
             availableBalance: -amount,
         });
-
-        revalidatePath(`/${lang}/dashboard`);
-        revalidatePath(`/${lang}/dashboard/withdraw`);
-        revalidatePath(`/${lang}/dashboard/history`);
 
         return { success: "Sua solicitação de saque foi processada com sucesso!" };
 

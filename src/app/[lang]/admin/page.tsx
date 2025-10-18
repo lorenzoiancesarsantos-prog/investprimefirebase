@@ -45,7 +45,6 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { getUsersAction } from '@/app/actions/user'; // Atualizado para usar a Server Action
 import type { User } from '@/lib/types';
-import { Timestamp } from 'firebase/firestore';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', {
@@ -53,10 +52,9 @@ const formatCurrency = (value: number) =>
     currency: 'BRL',
   }).format(value);
   
-const formatDate = (timestamp: Timestamp | Date | any) => { // Aceita 'any' temporariamente
-    if (!timestamp) return '-';
-    // O objeto da Server Action pode não ser uma instância de Timestamp
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.seconds * 1000);
+const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', {
         day: '2-digit',
         month: '2-digit',

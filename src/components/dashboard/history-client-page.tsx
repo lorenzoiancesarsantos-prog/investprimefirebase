@@ -2,24 +2,9 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, Handshake, Landmark, Info } from 'lucide-react';
-import { useState, useEffect } from "react";
 import type { Transaction } from "@/lib/types";
 
 export function HistoryClientPage({ initialTransactions }: { initialTransactions: Transaction[] }) {
-  const [history, setHistory] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Sort on the client to ensure consistency and avoid hydration mismatches
-    const sortedHistory = [...initialTransactions].sort((a, b) => {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateB - dateA;
-    });
-    setHistory(sortedHistory);
-    setLoading(false);
-  }, [initialTransactions]);
-
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", {
@@ -65,35 +50,20 @@ export function HistoryClientPage({ initialTransactions }: { initialTransactions
     }
   }
 
-  if (loading) {
-    return (
-       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="font-headline">Histórico de Transações</CardTitle>
-        </CardHeader>
-        <CardContent>
-             <div className="text-center text-muted-foreground py-8">
-                <p>Carregando histórico...</p>
-            </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="font-headline">Histórico de Transações</CardTitle>
         </CardHeader>
         <CardContent>
-            {history.length === 0 ? (
+            {initialTransactions.length === 0 ? (
                  <div className="text-center text-muted-foreground py-8">
                     <Info className="mx-auto h-8 w-8 mb-2" />
                     <p>Nenhuma transação ainda.</p>
                 </div>
             ) : (
                  <div className="space-y-4">
-                    {history.map((transaction) => (
+                    {initialTransactions.map((transaction) => (
                         <div key={transaction.id} className="timeline-item flex gap-4 p-4 bg-background/50 border border-border rounded-md transition-colors hover:border-primary">
                            <div className={`timeline-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10`}>
                                {getTransactionIcon(transaction.type)}

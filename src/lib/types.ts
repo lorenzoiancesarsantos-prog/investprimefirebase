@@ -5,8 +5,8 @@ export type User = {
     email: string;
     phone: string;
     invested: number;
-    accountType: 'Standard' | 'Premium';
-    status: 'active' | 'inactive' | 'suspended';
+    accountType: 'Standard' | 'Premium' | 'VIP';
+    status: 'active' | 'inactive';
     referralCode?: string;
     role: 'user' | 'admin';
     registrationDate: string;
