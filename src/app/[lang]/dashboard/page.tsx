@@ -5,7 +5,7 @@ import { OverviewCards } from "@/components/dashboard/overview-cards";
 import { InvestmentChart } from "@/components/dashboard/investment-chart";
 import { RecentPurchases } from "@/components/dashboard/recent-purchases";
 import { HistoryPage } from "./history/page";
-import { getUserAction, getPortfolioAction } from "@/app/actions/user"; // Alterado para Server Action
+import { getUserAction, getPortfolioAction } from "@/app/actions/user";
 import { getFirebaseAuth } from "@/firebase";
 import { useEffect, useState } from "react";
 import type { User, Portfolio } from "@/lib/types";
@@ -19,14 +19,22 @@ export default function DashboardPage() {
     const auth = getFirebaseAuth();
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        const [userData, portfolioData] = await Promise.all([
-          getUserAction(firebaseUser.uid), // Alterado para Server Action
-          getPortfolioAction(firebaseUser.uid) // Alterado para Server Action
-        ]);
-        setUser(userData);
-        setPortfolio(portfolioData);
+        try {
+          console.log("Fetching user and portfolio data for UID:", firebaseUser.uid);
+          const [userData, portfolioData] = await Promise.all([
+            getUserAction(firebaseUser.uid),
+            getPortfolioAction(firebaseUser.uid)
+          ]);
+          console.log("Data fetched successfully:", { userData, portfolioData });
+          setUser(userData);
+          setPortfolio(portfolioData);
+        } catch (error) {
+            console.error("Failed to fetch user data or portfolio:", error);
+            setUser(null);
+            setPortfolio(null);
+        }
       } else {
-        // Handle user not logged in, maybe redirect
+        console.log("User is not logged in.");
         setUser(null);
         setPortfolio(null);
       }
