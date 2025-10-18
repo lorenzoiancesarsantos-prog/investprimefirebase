@@ -1,8 +1,8 @@
 
 import { getUserAction, getPortfolioAction } from "@/app/actions/user";
-import { getFirebaseAuth } from "@/firebase";
-import { cookies } from "next/headers";
 import { getFirebaseAdminAuth } from "@/firebase-admin";
+import { cookies } from "next/headers";
+import { redirect } from 'next/navigation';
 import DashboardClientPage from "@/components/dashboard/dashboard-client-page";
 
 async function getAuthenticatedUser() {
@@ -15,11 +15,11 @@ async function getAuthenticatedUser() {
   }
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ params }: { params: { lang: string } }) {
   const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser) {
-    return <div>Você não está autenticado.</div>;
+    redirect(`/${params.lang}/login`);
   }
 
   const [user, portfolio] = await Promise.all([

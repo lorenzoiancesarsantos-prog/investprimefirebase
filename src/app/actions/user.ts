@@ -5,7 +5,6 @@ import { getFirebaseAdminDb, getFirebaseAdminAuth } from '@/firebase-admin';
 import type { User, Portfolio, Transaction } from '@/lib/types';
 import { FieldValue, Timestamp, FirestoreDataConverter, DocumentData } from 'firebase-admin/firestore';
 
-// Helper to convert Firestore data, ensuring serializable dates
 const userFromFirestore = (doc: DocumentData): User => {
     const data = doc.data();
     
@@ -13,10 +12,9 @@ const userFromFirestore = (doc: DocumentData): User => {
     if (data.registrationDate instanceof Timestamp) {
         registrationDate = data.registrationDate.toDate().toISOString();
     } else if (data.registrationDate) {
-        // Fallback for data that might not be a Timestamp
         registrationDate = new Date(data.registrationDate).toISOString();
     } else {
-        registrationDate = new Date().toISOString(); // Should not happen
+        registrationDate = new Date().toISOString();
     }
 
     return {
@@ -29,7 +27,7 @@ const userFromFirestore = (doc: DocumentData): User => {
         status: data.status || 'inactive',
         referralCode: data.referralCode,
         role: data.role || 'user',
-        registrationDate, // Use the converted, serializable date
+        registrationDate,
     };
 };
 
@@ -46,12 +44,15 @@ export async function getUsersAction(): Promise<User[]> {
   return querySnapshot.docs.map(doc => userFromFirestore(doc));
 }
 
-export async function addUserAction(user: Omit<User, 'id' | 'registrationDate'>): Promise<string> {
+export async function addUserAction(userData: Omit<User, 'id' | 'registrationDate'>): Promise<string> {
   const db = getFirebaseAdminDb();
-  const docRef = await db.collection('users').add({
-    ...user,
-    registrationDate: FieldValue.serverTimestamp(),
-  });
+  
+  const newUser = {
+      ...userData,
+      registrationDate: FieldValue.serverTimestamp(),
+  };
+
+  const docRef = await db.collection('users').add(newUser);
   return docRef.id;
 }
 
@@ -114,7 +115,6 @@ export async function getPortfolioAction(userId: string): Promise<Portfolio | nu
 
     if (docSnap.exists) {
         const data = docSnap.data();
-        // Manually reconstruct the object to ensure it's serializable
         return {
             totalValue: data?.totalValue || 0,
             previousTotalValue: data?.previousTotalValue || 0,
@@ -177,4 +177,3 @@ export async function getTransactionsAction(userId: string): Promise<Transaction
   const querySnapshot = await q.get();
   return querySnapshot.docs.map(doc => doc.data());
 }
-

@@ -12,25 +12,29 @@ async function createUserProfileAndPortfolio(uid: string, userData: { name: stri
   const batch = db.batch();
 
   const userRef = db.collection("users").doc(uid);
-  const newUser: Omit<User, 'id'> = {
+  const newUser = {
     name: userData.name,
     email: userData.email,
     phone: "",
     registrationDate: FieldValue.serverTimestamp(),
     invested: 0,
-    accountType: "Standard",
-    status: "active",
+    accountType: "Standard" as const,
+    status: "active" as const,
     referralCode: `REF${uid.substring(0, 5).toUpperCase()}`,
-    role: "user",
+    role: "user" as const,
   };
   batch.set(userRef, newUser);
 
   const portfolioRef = db.collection("portfolios").doc(uid);
   const newPortfolio: Portfolio = {
+    totalValue: 0,
+    previousTotalValue: 0,
     totalInvested: 0,
+    lifetimePnl: 0,
     monthlyGains: 0,
     royalties: 0,
     availableBalance: 0,
+    assets: [],
   };
   batch.set(portfolioRef, newPortfolio);
 
