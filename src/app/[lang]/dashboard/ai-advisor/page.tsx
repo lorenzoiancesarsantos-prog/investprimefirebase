@@ -1,3 +1,4 @@
+
 'use client';
 import Link from "next/link";
 import {
@@ -24,16 +25,17 @@ import { getUserAction } from "@/app/actions/user"; // Alterado para Server Acti
 import { getFirebaseAuth } from "@/firebase";
 import { useEffect, useState } from "react";
 import type { User } from "@/lib/types";
+import { useParams } from "next/navigation";
 
 export default function DashboardLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: { lang: string };
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const params = useParams();
+  const lang = params.lang as string;
 
   useEffect(() => {
     const auth = getFirebaseAuth();
@@ -58,7 +60,7 @@ export default function DashboardLayout({
     { href: `/${lang}/dashboard/settings`, label: 'Configurações', icon: Settings },
   ];
 
-  const navItems = getNavItems(params.lang);
+  const navItems = getNavItems(lang);
 
   return (
     <SidebarProvider>
@@ -86,7 +88,7 @@ export default function DashboardLayout({
            {loading ? (
              <div>Carregando...</div>
            ) : user ? (
-            <UserNav user={{ fullName: user.name, email: user.email, avatarUrl: `https://picsum.photos/seed/${user.id}/100/100` }} lang={params.lang} />
+            <UserNav user={{ fullName: user.name, email: user.email, avatarUrl: `https://picsum.photos/seed/${user.id}/100/100` }} lang={lang} />
            ) : (
              <div></div>
            )}
