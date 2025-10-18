@@ -150,12 +150,13 @@ export async function getPortfolioAction(userId: string): Promise<Portfolio | nu
 
 
 const transactionConverter: FirestoreDataConverter<Transaction> = {
-  toFirestore(transaction: Omit<Transaction, 'id'>): DocumentData {
+  toFirestore(transaction): DocumentData {
+    const date = transaction.date ? new Date(transaction.date) : new Date();
     return { 
       amount: transaction.amount,
       quantity: transaction.quantity,
       type: transaction.type,
-      date: Timestamp.fromDate(new Date(transaction.date)),
+      date: Timestamp.fromDate(date),
      };
   },
   fromFirestore(snapshot): Transaction {
