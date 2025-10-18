@@ -34,21 +34,21 @@ import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getFirebaseAuth } from '@/firebase';
-import { checkUserRoleAction } from '@/app/actions/user'; // Alterado para Server Action
+import { checkUserRoleAction } from '@/app/actions/user';
 
 function AdminUserNav() {
   const params = useParams();
   const lang = params.lang as string;
   const userInitials = 'AS';
   const auth = getFirebaseAuth();
-
-  const handleSignOut = () => {
-    auth.signOut();
-    router.push(`/${lang}/login`);
-  }
-
   const router = useRouter();
 
+
+  const handleSignOut = () => {
+    auth.signOut().then(() => {
+      router.push(`/${lang}/login`);
+    });
+  }
 
   return (
     <DropdownMenu>
@@ -146,28 +146,8 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const navItems = getNavItems(params.lang);
   const auth = getFirebaseAuth();
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const role = await checkUserRoleAction(user.uid); // Alterado para Server Action
-        if (role === 'admin') {
-          setIsAuthorized(true);
-        } else {
-          router.replace(`/${params.lang}/dashboard`);
-        }
-      } else {
-        router.replace(`/${params.lang}/login`);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [router, params.lang, auth]);
 
 
   const checkActive = (href: string) => {
@@ -178,20 +158,9 @@ export default function AdminLayout({
   };
   
   const handleSignOut = () => {
-    auth.signOut();
-    router.push(`/${params.lang}/login`);
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Verificando autorização...
-      </div>
-    );
-  }
-
-  if (!isAuthorized) {
-    return null;
+    auth.signOut().then(() => {
+        router.push(`/${params.lang}/login`);
+    });
   }
 
   return (
