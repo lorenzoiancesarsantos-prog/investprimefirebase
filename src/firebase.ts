@@ -3,20 +3,26 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
+// As variáveis de ambiente NEXT_PUBLIC_* são injetadas no cliente pelo Next.js
 const firebaseConfig = {
-    apiKey: "AIzaSyCOdAv8886YidVLgzYrHmO6G9c0_xyKg10",
-    authDomain: "studio-7505780173-ba373.firebaseapp.com",
-    projectId: "studio-7505780173-ba373",
-    storageBucket: "studio-7505780173-ba373.firebasestorage.app",
-    messagingSenderId: "705447916184",
-    appId: "1:705447916184:web:4e0936bd001a45e84616ed"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
+
+// Validação para garantir que o ficheiro .env.local está configurado
+if (!firebaseConfig.apiKey) {
+  throw new Error("A configuração do Firebase não foi encontrada. Verifique se o seu ficheiro .env.local está configurado corretamente com as variáveis NEXT_PUBLIC_FIREBASE_*.");
+}
 
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 
-function getClientFirebaseApp() {
+function getClientFirebaseApp(): FirebaseApp {
     if (getApps().length === 0) {
         app = initializeApp(firebaseConfig);
     } else {
@@ -33,7 +39,7 @@ export function getFirebaseAuth(): Auth {
     return auth;
 }
 
-export function getFirestoreDb(): Firestore {
+export function getFirebaseDb(): Firestore {
     if (!db) {
         const app = getClientFirebaseApp();
         db = getFirestore(app);
