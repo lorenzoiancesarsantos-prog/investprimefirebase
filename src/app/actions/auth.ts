@@ -24,34 +24,52 @@ export async function loginAction(values: unknown) {
   
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
-    return { error: "Dados de login inválidos. ID Token em falta." };
+    return { 
+      error: "Dados de login inválidos. ID Token em falta.",
+      success: false 
+    };
   }
 
   const { idToken } = parsed.data;
-  const auth = getFirebaseAdminAuth();
-
+  
   try {
+    const auth = getFirebaseAdminAuth();
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 dias em milissegundos
 
-    // Cria o cookie de sessão a partir do ID Token fornecido pelo cliente
+    const decodedToken = await auth.verifyIdToken(idToken);
+    console.log("ID Token verificado para usuário:", decodedToken.uid);
+
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
 
-    // Define o cookie no navegador do usuário
     const cookieStore = cookies();
-    await cookieStore.set('session', sessionCookie, {
+    cookieStore.set('session', sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: expiresIn / 1000, // maxAge é em segundos
+      maxAge: expiresIn / 1000,
       path: '/',
     });
     
     console.log("Cookie de sessão criado com sucesso.");
-    return { success: true };
+    return { 
+      success: true,
+      userId: decodedToken.uid 
+    };
 
   } catch (error: any) {
     console.error("Erro ao criar cookie de sessão:", error);
-    return { error: "Falha na autenticação no servidor. Tente novamente." };
+    
+    if (error.code === 'auth/id-token-expired') {
+      return { 
+        error: "Sessão expirada. Faça login novamente.",
+        success: false 
+      };
+    }
+    
+    return { 
+      error: "Falha na autenticação no servidor. Tente novamente.",
+      success: false 
+    };
   }
 }
 
@@ -60,89 +78,94 @@ export async function logoutAction() {
     console.log("Iniciando ação de logout...");
     const cookieStore = cookies();
     cookieStore.delete('session');
+    console.log("Logout realizado com sucesso");
     return { success: true };
   } catch (error: any) {
     console.error("Erro no logout:", error);
-    return { error: "Erro ao fazer logout." };
+    return { error: "Erro ao fazer logout.", success: false };
   }
 }
 
 export async function signupAction(values: unknown) {
   console.log("Iniciando ação de cadastro no servidor...");
   
+  let uid: string | null = null;
   const parsed = signupSchema.safeParse(values);
   if (!parsed.success) {
-    return { error: "Dados de cadastro inválidos.", validationErrors: parsed.error.issues };
+    return { error: "Dados de cadastro inválidos.", validationErrors: parsed.error.issues, success: false };
   }
 
   const { email, password, fullName } = parsed.data;
   
   try {
     const auth = getFirebaseAdminAuth();
-    const db = getFirebaseAdminDb();
-
-    // 1. Criar usuário no Firebase Authentication
     const userRecord = await auth.createUser({
       email,
       password,
       displayName: fullName,
       emailVerified: false,
     });
-    const uid = userRecord.uid;
+    uid = userRecord.uid;
     console.log(`Usuário criado no Auth com UID: ${uid}`);
 
-    // 2. Criar perfil e portfólio no Firestore dentro de um batch
+    const db = getFirebaseAdminDb();
     const batch = db.batch();
 
     const userRef = db.collection("users").doc(uid);
-    const newUser = {
-      name: fullName,
-      email: email,
-      phone: "",
-      registrationDate: FieldValue.serverTimestamp(),
-      invested: 0,
-      accountType: "Standard",
-      status: "active",
-      referralCode: `REF${uid.substring(0, 5).toUpperCase()}`,
-      role: "user",
-    };
-    batch.set(userRef, newUser);
+    batch.set(userRef, {
+      name: fullName, email: email, phone: "", registrationDate: FieldValue.serverTimestamp(), invested: 0,
+      accountType: "Standard", status: "active", referralCode: `REF${uid.substring(0, 5).toUpperCase()}`, role: "user", uid: uid,
+    });
 
     const portfolioRef = db.collection("portfolios").doc(uid);
-    const newPortfolio = {
-      totalValue: 0,
-      previousTotalValue: 0,
-      totalInvested: 0,
-      lifetimePnl: 0,
-      monthlyGains: 0,
-      royalties: 0,
-      availableBalance: 0,
-      assets: [],
-      createdAt: FieldValue.serverTimestamp(),
-    };
-    batch.set(portfolioRef, newPortfolio);
+    batch.set(portfolioRef, {
+      totalValue: 0, previousTotalValue: 0, totalInvested: 0, lifetimePnl: 0, monthlyGains: 0, royalties: 0,
+      availableBalance: 0, assets: [], createdAt: FieldValue.serverTimestamp(), userId: uid,
+    });
 
     await batch.commit();
     console.log(`Perfil e portfólio criados para: ${uid}`);
 
-    // 3. Retornar sucesso. O login automático será tratado no cliente.
     return { success: true, userId: uid };
 
   } catch (error: any) {
     console.error("Erro detalhado no processo de cadastro:", error);
     
-    // Se houver um UID, significa que a criação do usuário no Auth funcionou mas o Firestore falhou.
-    // Devemos deletar o usuário do Auth para permitir uma nova tentativa (Rollback).
-    if (error.uid) {
-      await getFirebaseAdminAuth().deleteUser(error.uid);
-      console.log(`Rollback: Usuário ${error.uid} deletado do Auth devido a falha no Firestore.`);
-    }
-
-    if (error.code === 'auth/email-already-exists') {
-      return { error: "Este e-mail já está em uso." };
+    if (uid) { // Se o UID existe, a criação do usuário funcionou, então devemos fazer rollback
+      try {
+        await getFirebaseAdminAuth().deleteUser(uid);
+        console.log(`Rollback: Usuário ${uid} deletado do Auth devido a falha no Firestore.`);
+      } catch (deleteError) {
+        console.error("Erro crítico: Falha ao deletar usuário durante rollback:", deleteError);
+      }
     }
     
-    return { error: "Ocorreu um erro inesperado durante o cadastro." };
+    if (error.code === 'auth/email-already-exists') {
+      return { error: "Este e-mail já está em uso.", success: false };
+    }
+    
+    return { error: "Ocorreu um erro inesperado durante o cadastro.", success: false };
+  }
+}
+
+export async function verifySessionAction() {
+  try {
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get('session')?.value;
+    if (!sessionCookie) return { isAuthenticated: false, user: null };
+    
+    const auth = getFirebaseAdminAuth();
+    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+    
+    return {
+      isAuthenticated: true,
+      user: { uid: decodedToken.uid, email: decodedToken.email, name: decodedToken.name },
+    };
+    
+  } catch (error) {
+    const cookieStore = cookies();
+    cookieStore.delete('session');
+    return { isAuthenticated: false, user: null };
   }
 }
 '''
