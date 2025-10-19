@@ -1,105 +1,45 @@
 "use server";
 
 import { z } from "zod";
+import { cookies } from "next/headers";
 import { getFirebaseAdminDb, getFirebaseAdminAuth } from "@/firebase-admin";
 import { FieldValue } from 'firebase-admin/firestore';
-import { cookies } from 'next/headers';
 import type { User, Portfolio } from '@/lib/types';
 
-// --- LOGIN ACTION ---
-
-const loginSchema = z.object({
-  idToken: z.string().min(1, "ID token is required"),
-});
-
-export async function loginAction(values: unknown) {
-  const parsed = loginSchema.safeParse(values);
-
-  if (!parsed.success) {
-    return { error: "Token de autenticação inválido." };
-  }
-  
-  const { idToken } = parsed.data;
-  const auth = getFirebaseAdminAuth();
-
-  try {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 dias
-
-    const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
-
-    cookies().set('session', sessionCookie, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: expiresIn,
-      path: '/',
-    });
-
-    return { success: true };
-  } catch (error: any) {
-    console.error("Erro ao criar o cookie de sessão:", {
-      errorMessage: error.message,
-      errorCode: error.code,
-      timestamp: new Date().toISOString()
-    });
-    return { error: "Falha ao iniciar a sessão. Tente novamente." };
-  }
-}
-
-
-// --- SIGNUP ACTION (com as suas melhorias) ---
-
-// Limitação de taxa simples
-const signupAttempts = new Map<string, { count: number; lastAttempt: number }>();
-
-function checkRateLimit(identifier: string) {
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000; // 15 minutos
-  const maxAttempts = 5;
-  
-  const userAttempts = signupAttempts.get(identifier) || { count: 0, lastAttempt: 0 };
-  
-  if (now - userAttempts.lastAttempt > windowMs) {
-    userAttempts.count = 0;
-  }
-  
-  if (userAttempts.count >= maxAttempts) {
-    throw new Error("Muitas tentativas de cadastro. Tente novamente em 15 minutos.");
-  }
-  
-  userAttempts.count++;
-  userAttempts.lastAttempt = now;
-  signupAttempts.set(identifier, userAttempts);
-}
-
-function sanitizeInput(data: { fullName: string; email: string; password: string }) {
-  return {
-    fullName: data.fullName.trim().replace(/\s+/g, ' '),
-    email: data.email.toLowerCase().trim(),
-    password: data.password.trim()
-  };
-}
+// --- SCHEMAS ---
 
 const signupSchema = z.object({
   fullName: z.string()
     .min(2, "Nome deve ter pelo menos 2 caracteres")
     .max(100, "Nome muito longo")
-    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Nome deve conter apenas letras"),
+    .trim(),
   email: z.string()
     .email("E-mail inválido")
-    .max(255, "E-mail muito longo"),
+    .max(255, "E-mail muito longo")
+    .toLowerCase()
+    .trim(),
   password: z.string()
-    .min(8, "A senha deve ter pelo menos 8 caracteres")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "A senha deve conter letras maiúsculas, minúsculas e números"),
+    .min(6, "A senha deve ter pelo menos 6 caracteres")
+    .max(128, "Senha muito longa"),
 });
+
+const loginSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
+});
+
+// --- HELPER FUNCTIONS ---
 
 async function createUserProfileAndPortfolio(uid: string, userData: { name: string; email: string }) {
   const db = getFirebaseAdminDb();
   
   try {
+    console.log(`Iniciando criação de perfil e portfolio para: ${uid}`);
+    
     const batch = db.batch();
 
     const userRef = db.collection("users").doc(uid);
-    const newUser = {
+    const newUser: Omit<User, 'id'> = {
       name: userData.name,
       email: userData.email,
       phone: "",
@@ -108,13 +48,17 @@ async function createUserProfileAndPortfolio(uid: string, userData: { name: stri
       invested: 0,
       accountType: "Standard" as const,
       status: "active" as const,
-      referralCode: `REF${uid.substring(0, 5).toUpperCase()}`,
+      referralCode: `REF${uid.substring(0, 8).toUpperCase()}`,
       role: "user" as const,
+      emailVerified: false,
     };
+    
     batch.set(userRef, newUser);
+    console.log(`Perfil de usuário configurado para: ${uid}`);
 
     const portfolioRef = db.collection("portfolios").doc(uid);
     const newPortfolio: Portfolio = {
+      userId: uid,
       totalValue: 0,
       previousTotalValue: 0,
       totalInvested: 0,
@@ -124,31 +68,36 @@ async function createUserProfileAndPortfolio(uid: string, userData: { name: stri
       availableBalance: 0,
       assets: [],
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
+    
     batch.set(portfolioRef, newPortfolio);
+    console.log(`Portfolio configurado para: ${uid}`);
 
     await batch.commit();
-    console.log(`Perfil de usuário e portfolio criados para: ${uid}`);
+    console.log(`Batch commit realizado com sucesso para: ${uid}`);
+    
+    return { success: true };
     
   } catch (error) {
-    console.error("Falha ao criar perfil de usuário e portfolio:", error);
-    throw new Error("USER_PROFILE_CREATION_FAILED");
+    console.error("Erro detalhado na criação do perfil e portfolio:", {
+      uid,
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    throw new Error("Falha na criação do perfil do usuário");
   }
 }
 
-export async function signupAction(values: unknown) {
-  // Simulação de IP do cliente (implemente conforme sua necessidade)
-  const clientIP = "client-identifier"; 
-  
-  try {
-    checkRateLimit(clientIP);
-  } catch (rateLimitError: any) {
-    return { error: rateLimitError.message };
-  }
+// --- SERVER ACTIONS ---
 
+export async function signupAction(values: unknown) {
+  console.log("Iniciando ação de cadastro...");
+  
   const parsed = signupSchema.safeParse(values);
 
   if (!parsed.success) {
+    console.log("Erro de validação:", parsed.error);
     const formattedErrors = parsed.error.issues.map(issue => ({
       field: issue.path.join('.'),
       message: issue.message
@@ -159,50 +108,50 @@ export async function signupAction(values: unknown) {
     };
   }
 
-  const sanitizedData = sanitizeInput(parsed.data);
-  const { email, password, fullName } = sanitizedData;
+  const { email, password, fullName } = parsed.data;
   
   try {
+    console.log(`Tentando criar usuário: ${email}`);
     const auth = getFirebaseAdminAuth();
-
-    // Verificar se email já existe
-    try {
-      await auth.getUserByEmail(email);
-      return { error: "Este e-mail já está em uso." };
-    } catch (error: any) {
-      if (error.code !== 'auth/user-not-found') {
-        throw error;
-      }
-    }
 
     const userRecord = await auth.createUser({
       email,
       password,
       displayName: fullName,
-      emailVerified: false, // Requerer verificação de email
+      emailVerified: false,
     });
 
     const uid = userRecord.uid;
+    console.log(`Usuário criado no Auth: ${uid}`);
 
     try {
       await createUserProfileAndPortfolio(uid, {
         name: fullName,
         email: email,
       });
+      
+      console.log(`Cadastro concluído com sucesso para: ${uid}`);
+      return { 
+        success: true, 
+        userId: uid,
+        message: "Cadastro realizado com sucesso!" 
+      };
+
     } catch (firestoreError: any) {
+      console.error("Erro no Firestore, realizando rollback...", firestoreError);
       await auth.deleteUser(uid);
-      console.error("Erro no Firestore durante o cadastro. Usuário do Auth deletado (rollback):", firestoreError);
-      return { error: "Ocorreu um erro ao finalizar seu perfil. Por favor, tente novamente." };
+      console.log(`Usuário ${uid} deletado do Auth (rollback)`);
+      
+      return { 
+        error: "Erro ao criar perfil do usuário. Tente novamente." 
+      };
     }
     
-    return { success: true, userId: uid };
-
   } catch (error: any) {
-    console.error("Erro detalhado no cadastro:", {
+    console.error("Erro no processo de cadastro:", {
       email,
       errorCode: error.code,
       errorMessage: error.message,
-      timestamp: new Date().toISOString()
     });
     
     if (error.code) {
@@ -210,14 +159,65 @@ export async function signupAction(values: unknown) {
         case 'auth/email-already-exists':
           return { error: "Este e-mail já está em uso." };
         case 'auth/weak-password':
-          return { error: "A senha é muito fraca. Use pelo menos 8 caracteres com letras maiúsculas, minúsculas e números." };
-        case 'auth/invalid-email':
-          return { error: "O e-mail fornecido é inválido." };
+          return { error: "A senha é muito fraca. Use pelo menos 6 caracteres." };
         default:
-          return { error: "Ocorreu um erro de autenticação. Tente novamente." };
+          return { error: "Erro de autenticação. Tente novamente." };
       }
     }
     
-    return { error: "Ocorreu um erro inesperado durante o cadastro. Tente novamente." };
+    return { 
+      error: "Erro interno do servidor. Tente novamente." 
+    };
   }
+}
+
+export async function loginAction(values: unknown) {
+  const parsed = loginSchema.safeParse(values);
+
+  if (!parsed.success) {
+    return { error: "Dados de login inválidos." };
+  }
+
+  const { email, password } = parsed.data;
+
+  // Note: Firebase client-side SDK handles actual sign-in.
+  // This server action is for creating a session cookie after the client confirms authentication.
+  // We expect an ID token to be passed from the client.
+  
+  // For this action, let'''s assume the client will send the ID token.
+  // We'''ll adjust the schema to expect an idToken.
+
+  const tokenSchema = z.object({ idToken: z.string() });
+  const tokenParsed = tokenSchema.safeParse(values);
+
+  if (!tokenParsed.success) {
+      return { error: "ID Token não fornecido." };
+  }
+  
+  const { idToken } = tokenParsed.data;
+  const auth = getFirebaseAdminAuth();
+
+  try {
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 dias
+    const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
+
+    cookies().set("session", sessionCookie, {
+      httpOnly: true,
+      secure: true,
+      maxAge: expiresIn,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    return { success: true };
+
+  } catch (error: any) {
+    console.error("Erro ao criar cookie de sessão:", error);
+    return { error: "Falha ao autenticar. Tente novamente." };
+  }
+}
+
+export async function logoutAction() {
+    cookies().delete("session");
+    return { success: true };
 }

@@ -9,7 +9,9 @@ export type User = {
     status: 'active' | 'inactive';
     referralCode?: string;
     role: 'user' | 'admin';
-    registrationDate: string;
+    registrationDate: any; // Can be a server timestamp
+    lastUpdated?: any; // Can be a server timestamp
+    emailVerified?: boolean;
 };
 
 export type Asset = {
@@ -22,6 +24,7 @@ export type Asset = {
 };
 
 export type Portfolio = {
+    userId: string;
     totalValue: number;
     previousTotalValue: number;
     totalInvested: number;
@@ -30,6 +33,8 @@ export type Portfolio = {
     royalties: number;
     availableBalance: number;
     assets: Asset[];
+    createdAt?: any; // Can be a server timestamp
+    updatedAt?: any; // Can be a server timestamp
 };
 
 export type Transaction = {
